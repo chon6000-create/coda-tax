@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite'
 
 export default defineConfig({
-    base: '/코다세/',
+    base: '/coda-tax/',
     server: {
         port: 5173,
         open: true
