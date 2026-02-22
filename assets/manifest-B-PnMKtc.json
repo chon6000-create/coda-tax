@@ -2,7 +2,7 @@
     "name": "유튜버 세무정석",
     "short_name": "세무정석",
     "description": "유튜버 전용 말로 하는 간편 세무 장부",
-    "start_url": "/index.html",
+    "start_url": "./index.html",
     "display": "standalone",
     "background_color": "#0a0a0c",
     "theme_color": "#10b981",
