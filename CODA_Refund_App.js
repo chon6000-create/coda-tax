@@ -1,17 +1,31 @@
-﻿/**
- * YouTuber Tax Assistant (MVP Final)
- * Premium Financial SaaS Tone & Hometax-ready Logic
- */
+﻿import { auth, db } from "./firebase-config.js";
+import {
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword,
+    onAuthStateChanged,
+    signOut
+} from "firebase/auth";
+import {
+    collection,
+    addDoc,
+    deleteDoc,
+    doc,
+    onSnapshot,
+    query,
+    where,
+    orderBy
+} from "firebase/firestore";
 
 window.kodaEngine = (() => {
     // --- State ---
     let state = {
-        isSubscribed: localStorage.getItem('yt_user_status') === 'paid',
-        currentUser: JSON.parse(localStorage.getItem('yt_current_user')) || null,
-        accounts: JSON.parse(localStorage.getItem('yt_accounts')) || [],
-        records: JSON.parse(localStorage.getItem('yt_tax_records')) || [],
+        isSubscribed: false,
+        currentUser: null,
+        accounts: [], // No longer used for local storage
+        records: [],
         categories: [
             { id: '수입 합계', keywords: ['애드센스', '협찬', '수입', '입금', '광고수익', '도네', '후원'], type: 'income', box: '수입' },
+            // ... (rest of categories)
             { id: '식대', keywords: ['식대', '밥', '회식', '미팅', '커피'], type: 'expense', box: '15' },
             { id: '여비교통비', keywords: ['교통', '차비', '택시', '버스', '지하철', '주유', '기름'], type: 'expense', box: '15' },
             { id: '촬영소품', keywords: ['소품', '배경', '의상', '분장'], type: 'expense', box: '11' },
@@ -52,13 +66,13 @@ window.kodaEngine = (() => {
         if (!landing || !dashboard) return;
 
         if (hash === '#/dashboard' || hash.startsWith('#/dashboard')) {
-            if (!isPaid) { navigate('/'); return; }
+            if (!state.currentUser && !isPaid) { navigate('/'); return; }
             landing.style.display = 'none';
             dashboard.style.display = 'flex';
             render();
         } else {
             // Auto-redirect to dashboard only on INITIAL LOAD if already logged in and paid
-            if (isInitialLoad && isPaid && localStorage.getItem('yt_current_user')) {
+            if (isInitialLoad && state.currentUser) {
                 navigate('/dashboard');
                 return;
             }
@@ -68,6 +82,40 @@ window.kodaEngine = (() => {
     };
 
     const init = () => {
+        // Firebase Auth Listener
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                state.currentUser = user;
+                state.isSubscribed = true; // Assume paid if logged in for now, or fetch from user profile
+                localStorage.setItem('yt_user_status', 'paid');
+
+                // Fetch Records from Firestore
+                const q = query(
+                    collection(db, "users", user.uid, "records"),
+                    orderBy("date", "desc")
+                );
+
+                onSnapshot(q, (snapshot) => {
+                    state.records = snapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+                    render();
+                });
+
+                if (window.location.hash === '#/') {
+                    navigate('/dashboard');
+                }
+            } else {
+                state.currentUser = null;
+                state.isSubscribed = false;
+                state.records = [];
+                localStorage.removeItem('yt_user_status');
+                navigate('/');
+                render();
+            }
+        });
+
         handleRouting(true); // Initial load check
         window.addEventListener('hashchange', () => handleRouting(false));
 
@@ -147,22 +195,12 @@ window.kodaEngine = (() => {
         }
     };
 
-    const applyCategoryAmount = (text) => {
+    const applyCategoryAmount = async (text) => {
         const amount = parseAmountOnly(text);
-        if (amount > 0) {
-            // Create or update record for this category/year (aggregated)
-            const dateStr = `${state.pendingYear}-12-31`;
-
-            // Fix: Ensure we use the exact category ID (especially for '수입 합계')
+        if (amount > 0 && state.currentUser) {
             const finalCategory = state.pendingCategory;
-
-            // Remove existing '전년실적' for this category/year to prevent duplicates
-            state.records = state.records.filter(r =>
-                !(r.status === '전년실적' && r.category === finalCategory && r.date.startsWith(state.pendingYear))
-            );
-
             const newRec = {
-                date: dateStr,
+                date: `${state.pendingYear}-12-31`,
                 type: finalCategory === '수입 합계' ? 'income' : 'expense',
                 category: finalCategory,
                 label: `[실적] ${finalCategory}`,
@@ -171,38 +209,42 @@ window.kodaEngine = (() => {
                 memo: `보이스 입력: ${text}`
             };
 
-            state.records.push(newRec);
-            saveRecords();
-            render();
-
-            get('voice-modal').style.display = 'none';
-            showPrevYearSummary();
-
-            state.pendingCategory = null;
-            state.pendingYear = null;
+            try {
+                await addDoc(collection(db, "users", state.currentUser.uid, "records"), newRec);
+                get('voice-modal').style.display = 'none';
+                showPrevYearSummary();
+                state.pendingCategory = null;
+                state.pendingYear = null;
+            } catch (e) {
+                console.error("Error adding document: ", e);
+                alert("저장 중 오류가 발생했습니다.");
+            }
         } else {
             alert("금액을 정확히 인식하지 못했습니다. 다시 시도해 주세요.");
         }
     };
 
-    const clearCategoryAmount = (target, year, isBox = false) => {
+    const clearCategoryAmount = async (target, year, isBox = false) => {
+        if (!state.currentUser) return;
         if (confirm(`[${target}] 데이터를 삭제하고 초기화하시겠습니까?\n(언제든지 다시 입력할 수 있습니다.)`)) {
             const yearStr = year.toString();
-            state.records = state.records.filter(r => {
+            const toDelete = state.records.filter(r => {
                 const matchesYear = r.date.startsWith(yearStr);
-                if (!matchesYear) return true;
+                if (!matchesYear) return false;
 
                 if (isBox) {
-                    if (target === '수입 합계') return r.type !== 'income';
+                    if (target === '수입 합계') return r.type === 'income';
                     const catObj = state.categories.find(c => c.id === r.category);
-                    return !catObj || catObj.box !== target;
+                    return catObj && catObj.box === target;
                 } else {
-                    if (target === '수입 합계') return r.type !== 'income';
-                    return r.category !== target;
+                    if (target === '수입 합계') return r.type === 'income';
+                    return r.category === target;
                 }
             });
-            saveRecords();
-            render();
+
+            for (const r of toDelete) {
+                if (r.id) await deleteDoc(doc(db, "users", state.currentUser.uid, "records", r.id));
+            }
             showPrevYearSummary();
         }
     };
@@ -285,13 +327,16 @@ window.kodaEngine = (() => {
         }
     };
 
-    const confirmVoiceEntry = () => {
-        if (!state.lastDetected) return;
-        state.records.unshift(state.lastDetected);
-        saveRecords();
-        render();
-        get('voice-modal').style.display = 'none';
-        state.lastDetected = null;
+    const confirmVoiceEntry = async () => {
+        if (!state.lastDetected || !state.currentUser) return;
+        try {
+            await addDoc(collection(db, "users", state.currentUser.uid, "records"), state.lastDetected);
+            get('voice-modal').style.display = 'none';
+            state.lastDetected = null;
+        } catch (e) {
+            console.error(e);
+            alert("저장 실패");
+        }
     };
 
     const parseVoiceText = (text) => {
@@ -579,25 +624,34 @@ window.kodaEngine = (() => {
 
         const list = get('history-list-mvp');
         if (list) {
-            const display = filtered.slice(0, 5);
+            const display = filtered.slice(0, 10);
             if (display.length === 0) {
                 list.innerHTML = '<tr><td colspan="5" class="empty-row">기록이 없습니다.</td></tr>';
             } else {
-                list.innerHTML = display.map((r, i) => `
+                list.innerHTML = display.map((r) => `
                     <tr>
                         <td class="cell-date">${r.date.slice(5).replace('-', '/')}</td>
                         <td class="cell-type ${r.type}">${r.type === 'income' ? '수입' : '경비'}</td>
                         <td class="cell-cat">${r.label || r.category}</td>
                         <td class="cell-amt">${formatCurrency(r.amount)}</td>
-                        <td style="text-align:right;"><button class="delete-btn" onclick="kodaEngine.deleteRecord(${i})">✕</button></td>
+                        <td style="text-align:right;"><button class="delete-btn" onclick="kodaEngine.deleteRecord('${r.id}')">✕</button></td>
                     </tr>
                 `).join('');
             }
         }
     };
 
-    const saveRecords = () => localStorage.setItem('yt_tax_records', JSON.stringify(state.records));
-    const deleteRecord = (i) => { if (confirm("삭제할까요?")) { state.records.splice(i, 1); saveRecords(); render(); } };
+    const deleteRecord = async (id) => {
+        if (!state.currentUser) return;
+        if (confirm("삭제할까요?")) {
+            try {
+                await deleteDoc(doc(db, "users", state.currentUser.uid, "records", id));
+            } catch (e) {
+                console.error(e);
+                alert("삭제 실패");
+            }
+        }
+    };
     const goBack = () => { navigate('/'); };
 
     const tryStartService = () => {
@@ -617,30 +671,26 @@ window.kodaEngine = (() => {
         get('payment-view-success').style.display = 'block';
     };
 
-    const finalizeSignUp = (e) => {
+    const finalizeSignUp = async (e) => {
         if (e) e.preventDefault();
         const id = get('reg-id').value.trim();
         const pw = get('reg-pw').value.trim();
         if (!id || !pw) { alert("아이디와 비밀번호를 입력해주세요."); return; }
 
-        if (state.accounts.some(a => a.id === id)) {
-            alert("이미 존재하는 아이디입니다. 다른 아이디를 사용해주세요.");
-            return;
+        try {
+            // Firebase Auth requires an email format, we'll append a domain if it's just an ID
+            const email = id.includes('@') ? id : `${id}@coda-tax.com`;
+            await createUserWithEmailAndPassword(auth, email, pw);
+            alert("가입 및 결제가 완료되었습니다! 환영합니다.");
+            get('payment-modal').style.display = 'none';
+            navigate('/dashboard');
+        } catch (e) {
+            console.error(e);
+            alert("가입 실패: " + e.message);
         }
-
-        const newUser = { id, pw, status: 'paid' };
-        state.accounts.push(newUser);
-        state.currentUser = newUser;
-        localStorage.setItem('yt_accounts', JSON.stringify(state.accounts));
-        localStorage.setItem('yt_current_user', JSON.stringify(newUser));
-        localStorage.setItem('yt_user_status', 'paid');
-
-        alert("가입 및 결제가 완료되었습니다! 환영합니다.");
-        get('payment-modal').style.display = 'none';
-        navigate('/dashboard');
     };
 
-    const login = (e) => {
+    const login = async (e) => {
         if (e) e.preventDefault();
         const id = get('login-id').value.trim();
         const pw = get('login-pw').value.trim();
@@ -650,20 +700,13 @@ window.kodaEngine = (() => {
             return;
         }
 
-        const user = state.accounts.find(a => a.id === id && a.pw === pw);
-
-        if (user) {
-            state.currentUser = user;
-            localStorage.setItem('yt_current_user', JSON.stringify(user));
-            localStorage.setItem('yt_user_status', user.status);
+        try {
+            const email = id.includes('@') ? id : `${id}@coda-tax.com`;
+            await signInWithEmailAndPassword(auth, email, pw);
             navigate('/dashboard');
-        } else {
-            const idExists = state.accounts.some(a => a.id === id);
-            if (idExists) {
-                alert("비밀번호가 올바르지 않습니다.");
-            } else {
-                alert("존재하지 않는 아이디거나 구독 정보가 없습니다.");
-            }
+        } catch (e) {
+            console.error(e);
+            alert("로그인 실패: 아이디 또는 비밀번호를 확인해주세요.");
         }
     };
 
@@ -672,14 +715,15 @@ window.kodaEngine = (() => {
         else alert("로그인이 필요합니다.");
     };
 
-    const logout = () => {
+    const logout = async () => {
         if (!confirm("로그아웃 하시겠습니까?")) return;
-        state.currentUser = null;
-        state.isSubscribed = false;
-        localStorage.removeItem('yt_current_user');
-        localStorage.removeItem('yt_user_status');
-        alert("로그아웃 되었습니다.");
-        navigate('/');
+        try {
+            await signOut(auth);
+            alert("로그아웃 되었습니다.");
+            navigate('/');
+        } catch (e) {
+            console.error(e);
+        }
     };
 
 
@@ -704,8 +748,9 @@ window.kodaEngine = (() => {
         logout,
         loginWithStoredStatus,
         openAddModal: () => get('edit-modal').style.display = 'flex',
-        saveManualEntry: (e) => {
+        saveManualEntry: async (e) => {
             e.preventDefault();
+            if (!state.currentUser) return;
             const rec = {
                 date: get('edit-date').value || new Date().toISOString().split('T')[0],
                 type: get('edit-type').value,
@@ -713,10 +758,13 @@ window.kodaEngine = (() => {
                 amount: parseInt(get('edit-amount').value) || 0,
                 status: '준비'
             };
-            state.records.unshift(rec);
-            saveRecords();
-            render();
-            get('edit-modal').style.display = 'none';
+            try {
+                await addDoc(collection(db, "users", state.currentUser.uid, "records"), rec);
+                get('edit-modal').style.display = 'none';
+            } catch (e) {
+                console.error(e);
+                alert("저장 실패");
+            }
         }
     };
 })();

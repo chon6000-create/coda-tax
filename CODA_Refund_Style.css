@@ -54,8 +54,8 @@ body {
 }
 
 .logo-area h1 {
-    font-size: 1.4rem;
-    font-weight: 700;
+    font-size: 1.8rem;
+    font-weight: 800;
     color: var(--text-primary);
     letter-spacing: -0.02em;
 }
@@ -85,14 +85,14 @@ body {
 }
 
 .settlement-summary-card .card-header {
-    font-size: 1.1rem;
+    font-size: 1.3rem;
     color: var(--text-muted);
     margin-bottom: 1rem;
     font-weight: 600;
 }
 
 .settlement-summary-card h2 {
-    font-size: 3.2rem;
+    font-size: 4rem;
     font-weight: 800;
     margin-bottom: 1.5rem;
     letter-spacing: -0.04em;
@@ -126,12 +126,12 @@ body {
 }
 
 .mini-item .label {
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     color: var(--text-muted);
 }
 
 .mini-item .val {
-    font-size: 1.2rem;
+    font-size: 1.4rem;
     font-weight: 700;
     color: var(--text-primary);
 }
@@ -178,7 +178,7 @@ body {
 
 .mic-label {
     margin-top: 1.5rem;
-    font-size: 1.3rem;
+    font-size: 1.6rem;
     font-weight: 700;
     color: var(--text-primary);
 }
@@ -258,7 +258,7 @@ body {
 }
 
 .section-header .title {
-    font-size: 1.3rem;
+    font-size: 1.5rem;
     font-weight: 800;
 }
 
@@ -381,7 +381,7 @@ body {
 }
 
 .nav-item .label {
-    font-size: 0.75rem;
+    font-size: 0.95rem;
     font-weight: 700;
 }
 
@@ -784,7 +784,7 @@ body {
 }
 
 .nav-label {
-    font-size: 0.75rem;
+    font-size: 0.95rem;
     font-weight: 600;
 }
 
