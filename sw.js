@@ -1,10 +1,12 @@
-const CACHE_NAME = 'yt-tax-v3';
+const CACHE_NAME = 'yt-tax-v4';
 const ASSETS = [
     '/coda-tax/',
     '/coda-tax/index.html',
     '/coda-tax/CODA_Refund_App.js',
     '/coda-tax/CODA_Refund_Style.css',
-    '/coda-tax/manifest.json'
+    '/coda-tax/manifest.json',
+    '/coda-tax/icon-192.png',
+    '/coda-tax/icon-512.png'
 ];
 
 self.addEventListener('install', (event) => {
