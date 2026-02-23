@@ -54,7 +54,7 @@ body {
 }
 
 .logo-area h1 {
-    font-size: 1.1rem;
+    font-size: 1.4rem;
     font-weight: 700;
     color: var(--text-primary);
     letter-spacing: -0.02em;
@@ -85,14 +85,14 @@ body {
 }
 
 .settlement-summary-card .card-header {
-    font-size: 0.85rem;
+    font-size: 1.1rem;
     color: var(--text-muted);
     margin-bottom: 1rem;
     font-weight: 600;
 }
 
 .settlement-summary-card h2 {
-    font-size: 2.5rem;
+    font-size: 3.2rem;
     font-weight: 800;
     margin-bottom: 1.5rem;
     letter-spacing: -0.04em;
@@ -126,12 +126,12 @@ body {
 }
 
 .mini-item .label {
-    font-size: 0.7rem;
+    font-size: 0.9rem;
     color: var(--text-muted);
 }
 
 .mini-item .val {
-    font-size: 0.9rem;
+    font-size: 1.2rem;
     font-weight: 700;
     color: var(--text-primary);
 }
@@ -177,8 +177,8 @@ body {
 }
 
 .mic-label {
-    margin-top: 1.25rem;
-    font-size: 1rem;
+    margin-top: 1.5rem;
+    font-size: 1.3rem;
     font-weight: 700;
     color: var(--text-primary);
 }
@@ -187,7 +187,7 @@ body {
     background: none;
     border: none;
     color: var(--text-muted);
-    font-size: 0.85rem;
+    font-size: 1rem;
     text-decoration: underline;
     cursor: pointer;
 }
@@ -231,10 +231,10 @@ body {
     margin-top: 1.5rem;
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.05);
-    padding: 0.6rem 1.2rem;
+    padding: 0.8rem 1.5rem;
     border-radius: 20px;
     color: var(--text-muted);
-    font-size: 0.8rem;
+    font-size: 1rem;
     cursor: pointer;
     transition: background 0.2s;
 }
@@ -258,7 +258,7 @@ body {
 }
 
 .section-header .title {
-    font-size: 1.1rem;
+    font-size: 1.3rem;
     font-weight: 800;
 }
 
@@ -269,22 +269,22 @@ body {
 
 .records-table th {
     text-align: left;
-    font-size: 0.7rem;
+    font-size: 0.9rem;
     color: var(--text-muted);
     padding-bottom: 0.75rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .records-table td {
-    padding: 1rem 0;
-    font-size: 0.85rem;
+    padding: 1.2rem 0;
+    font-size: 1.1rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.02);
 }
 
 .cell-date {
     color: var(--text-muted);
-    font-size: 0.75rem;
-    width: 50px;
+    font-size: 0.9rem;
+    width: 60px;
 }
 
 .cell-type {
@@ -309,12 +309,12 @@ body {
 .btn-see-all {
     width: 100%;
     margin-top: 1.5rem;
-    padding: 0.75rem;
+    padding: 1rem;
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.05);
     border-radius: 12px;
     color: var(--text-muted);
-    font-size: 0.85rem;
+    font-size: 1.1rem;
     font-weight: 600;
     cursor: pointer;
 }
@@ -677,14 +677,14 @@ body {
 }
 
 .welcome-title {
-    font-size: 2rem;
+    font-size: 2.5rem;
     font-weight: 800;
     margin-bottom: 1rem;
     letter-spacing: -0.02em;
 }
 
 .welcome-description {
-    font-size: 1rem;
+    font-size: 1.25rem;
     color: var(--text-muted);
     line-height: 1.6;
     margin-bottom: 2.5rem;
@@ -699,14 +699,14 @@ body {
 }
 
 .price-amount {
-    font-size: 2.5rem;
+    font-size: 3rem;
     font-weight: 800;
     color: white;
     margin-bottom: 0.5rem;
 }
 
 .price-tagline {
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     color: #3B82F6;
     font-weight: 600;
 }
