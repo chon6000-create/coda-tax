@@ -8,7 +8,7 @@
     <title>유튜버 세무정석 - Coda</title>
 
     <!-- PWA Meta Tags -->
-    <link rel="manifest" href="./manifest.json">
+    <link rel="manifest" href="/coda-tax/manifest.json">
     <meta name="theme-color" content="#10b981">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -657,7 +657,7 @@
             kodaEngine.init();
             // PWA Service Worker Registration
             if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('./sw.js')
+                navigator.serviceWorker.register('/coda-tax/sw.js')
                     .then(reg => console.log('SW Registered', reg))
                     .catch(err => console.error('SW Error', err));
             }
