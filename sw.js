@@ -1,4 +1,4 @@
-const CACHE_NAME = 'yt-tax-v1';
+const CACHE_NAME = 'yt-tax-v2';
 const ASSETS = [
     './',
     './index.html',
