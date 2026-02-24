@@ -654,11 +654,38 @@ window.kodaEngine = (() => {
     };
     const goBack = () => { navigate('/'); };
 
+    const setupCardInputs = () => {
+        const cardFields = ['card-n1', 'card-n2', 'card-n3', 'card-n4', 'card-exp-mm', 'card-exp-yy', 'card-cvc', 'card-pw2'];
+
+        cardFields.forEach((id, index) => {
+            const el = get(id);
+            if (!el) return;
+
+            el.addEventListener('input', (e) => {
+                const val = e.target.value.replace(/\D/g, '');
+                e.target.value = val; // Force numeric
+
+                if (val.length === e.target.maxLength) {
+                    const next = get(cardFields[index + 1]);
+                    if (next) next.focus();
+                }
+            });
+
+            el.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && e.target.value.length === 0) {
+                    const prev = get(cardFields[index - 1]);
+                    if (prev) prev.focus();
+                }
+            });
+        });
+    };
+
     const tryStartService = () => {
         get('payment-view-initial').style.display = 'block';
         get('payment-view-card').style.display = 'none';
         get('payment-view-success').style.display = 'none';
         get('payment-modal').style.display = 'flex';
+        setupCardInputs(); // Re-bind just in case
     };
 
     const showCardInput = () => {
