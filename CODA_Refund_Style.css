@@ -2717,17 +2717,28 @@ body {
 
 .input-styled-samofit {
     width: 100%;
-    background: rgba(0, 0, 0, 0.4);
-    /* Darker background for visual comfort */
+    background: #0f172a !important;
+    /* Consistent Dark Navy */
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 12px;
     padding: 14px 20px;
-    color: white;
+    color: white !important;
     font-size: 1rem;
     box-sizing: border-box;
     margin-bottom: 12px;
     transition: all 0.3s ease;
     outline: none;
+}
+
+/* Force dark style even during autofill */
+.input-styled-samofit:-webkit-autofill,
+.input-styled-samofit:-webkit-autofill:hover,
+.input-styled-samofit:-webkit-autofill:focus,
+.input-styled-samofit:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px #0f172a inset !important;
+    -webkit-text-fill-color: white !important;
+    background-color: #0f172a !important;
+    transition: background-color 5000s ease-in-out 0s;
 }
 
 .input-styled-samofit:focus {
@@ -2738,7 +2749,8 @@ body {
 }
 
 .input-styled-samofit::placeholder {
-    color: rgba(255, 255, 255, 0.3);
+    color: rgba(255, 255, 255, 0.5);
+    /* Slightly brighter for better visibility */
 }
 
 .footer-link-samofit {

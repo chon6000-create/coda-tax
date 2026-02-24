@@ -704,10 +704,13 @@ window.kodaEngine = (() => {
 
         try {
             const email = id.includes('@') ? id : `${id}@coda-tax.com`;
+            console.log("Attempting login for:", email);
             await signInWithEmailAndPassword(auth, email, pw);
             navigate('/dashboard');
         } catch (e) {
-            console.error(e);
+            console.error("Login Error Code:", e.code);
+            console.error("Login Error Message:", e.message);
+
             let msg = "로그인에 실패했습니다.";
             if (e.code === 'auth/user-not-found' || e.code === 'auth/invalid-credential') {
                 msg = "아이디 또는 비밀번호가 올바르지 않습니다.";
