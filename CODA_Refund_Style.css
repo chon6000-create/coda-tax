@@ -2717,9 +2717,9 @@ body {
 
 .input-styled-samofit {
     width: 100%;
-    background: rgba(59, 130, 246, 0.08);
-    /* Slightly darker/more premium base */
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(0, 0, 0, 0.4);
+    /* Darker background for visual comfort */
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 12px;
     padding: 14px 20px;
     color: white;
