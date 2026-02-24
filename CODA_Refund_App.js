@@ -664,9 +664,11 @@ window.kodaEngine = (() => {
     const showCardInput = () => {
         get('payment-view-initial').style.display = 'none';
         get('payment-view-card').style.display = 'block';
+        get('payment-view-success').style.display = 'none';
     };
 
     const confirmSubscription = () => {
+        get('payment-view-initial').style.display = 'none';
         get('payment-view-card').style.display = 'none';
         get('payment-view-success').style.display = 'block';
     };
