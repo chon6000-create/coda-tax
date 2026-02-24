@@ -448,41 +448,53 @@
 
         <!-- Landing View -->
         <div id="user-type-overlay" class="welcome-overlay">
-            <div class="welcome-card">
-                <div class="welcome-emoji">📱</div>
-                <h2 class="welcome-title">유튜버 세무정석</h2>
-                <p class="welcome-description">말 한마디로 끝나는<br>유튜버 전용 간편 장부</p>
+            <header class="welcome-header">
+                <div class="welcome-emoji"
+                    style="width: 90px; height: 90px; background: white; border-radius: 50%; margin: 0 auto 1.5rem; display: flex; align-items: center; justify-content: center; font-size: 3.5rem; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+                    💎</div>
+                <h2 class="welcome-brand-title">유튜버 세무정석</h2>
+                <p class="welcome-brand-sub" id="welcome-sub-text">다시 오신 것을 환영합니다</p>
+            </header>
 
-                <div id="landing-main-actions">
-                    <div class="price-card">
-                        <div class="price-amount">월 5,900원</div>
-                        <div class="price-tagline">정기 구독 전용</div>
+            <div class="welcome-card">
+                <!-- Initial Actions (Now secondary) -->
+                <div id="landing-main-actions" style="display:none;">
+                    <h3 class="card-title-main">프리미엄 구독</h3>
+                    <div class="price-card"
+                        style="background: rgba(255, 255, 255, 0.05); border-radius: 24px; padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid rgba(255, 255, 255, 0.1);">
+                        <div class="price-amount"
+                            style="font-size: 1.8rem; font-weight: 800; color: #f59e0b; margin-bottom: 0.2rem;">월 5,900원
+                        </div>
+                        <div class="price-tagline" style="font-size: 0.9rem; color: #94a3b8;">정기 구독 시 모든 AI 기능 무제한</div>
                     </div>
-                    <button class="btn-primary w-100 mb-2" onclick="window.kodaEngine.tryStartService()">신규 구독
-                        시작하기</button>
-                    <button class="btn-text-link w-100"
-                        onclick="document.getElementById('login-section').style.display='block'; document.getElementById('landing-main-actions').style.display='none';">이미
-                        구독 중이신가요?</button>
+                    <button class="btn-yellow-samofit" onclick="window.kodaEngine.tryStartService()">신규 구독 시작하기</button>
+                    <div class="footer-link-samofit"
+                        onclick="document.getElementById('login-section').style.display='block'; document.getElementById('landing-main-actions').style.display='none'; document.getElementById('welcome-sub-text').innerText='다시 오신 것을 환영합니다';">
+                        이미 계정이 있으신가요? 로그인
+                    </div>
                 </div>
 
-                <!-- Login Section (Initially Hidden) -->
-                <form id="login-section" onsubmit="window.kodaEngine.login(event)"
-                    style="display:none; margin-top:1rem; background:rgba(255,255,255,0.03); padding:1.5rem; border-radius:24px; border:1px solid rgba(255,255,255,0.05); text-align:left;">
-                    <div style="display:flex; align-items:center; margin-bottom:1.5rem;">
-                        <button type="button" class="btn-back-arrow"
-                            onclick="document.getElementById('login-section').style.display='none'; document.getElementById('landing-main-actions').style.display='block';"
-                            style="margin-right:8px;">←</button>
-                        <h3 style="margin:0; font-size:1.1rem;">로그인</h3>
+
+                <!-- Login Section (Now Default) -->
+                <form id="login-section" style="display:block; text-align: left;"
+                    onsubmit="window.kodaEngine.login(event)">
+                    <div style="display:flex; align-items:center; justify-content: center; margin-bottom: 2rem;">
+                        <h3 style="margin:0; font-size:1.4rem; color:white; font-weight: 800; text-align: center;">
+                            로그인</h3>
                     </div>
+
                     <input type="text" id="login-id" name="username" autocomplete="username" placeholder="아이디"
-                        class="input-full mb-1"
-                        style="background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.1); color:white; padding:12px; border-radius:12px;"
-                        required>
+                        class="input-styled-samofit" required>
+
                     <input type="password" id="login-pw" name="password" autocomplete="current-password"
-                        placeholder="비밀번호" class="input-full mb-2"
-                        style="background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.1); color:white; padding:12px; border-radius:12px;"
-                        required>
-                    <button type="submit" class="btn-primary w-100">로그인</button>
+                        placeholder="비밀번호" class="input-styled-samofit" required>
+
+                    <button type="submit" class="btn-yellow-samofit">로그인</button>
+
+                    <div class="footer-link-samofit"
+                        onclick="document.getElementById('login-section').style.display='none'; document.getElementById('landing-main-actions').style.display='block'; document.getElementById('welcome-sub-text').innerText='말 한마디로 끝나는 지능형 간편 장부';">
+                        계정이 없으신가요? 시작하기
+                    </div>
                 </form>
             </div>
         </div>
