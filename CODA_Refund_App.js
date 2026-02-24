@@ -706,7 +706,15 @@ window.kodaEngine = (() => {
             navigate('/dashboard');
         } catch (e) {
             console.error(e);
-            alert("로그인 실패: 아이디 또는 비밀번호를 확인해주세요.");
+            let msg = "로그인에 실패했습니다.";
+            if (e.code === 'auth/user-not-found' || e.code === 'auth/invalid-credential') {
+                msg = "아이디 또는 비밀번호가 올바르지 않습니다.";
+            } else if (e.code === 'auth/wrong-password') {
+                msg = "비밀번호가 올바르지 않습니다.";
+            } else if (e.code === 'auth/invalid-email') {
+                msg = "아이디 형식이 올바르지 않습니다.";
+            }
+            alert(msg + " (오류: " + e.code + ")");
         }
     };
 

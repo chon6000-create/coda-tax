@@ -448,9 +448,7 @@
         <!-- Landing View -->
         <div id="user-type-overlay" class="welcome-overlay">
             <header class="welcome-header">
-                <div class="welcome-emoji"
-                    style="width: 90px; height: 90px; background: white; border-radius: 50%; margin: 0 auto 1.5rem; display: flex; align-items: center; justify-content: center; font-size: 3.5rem; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
-                    💎</div>
+                <div class="welcome-emoji-placeholder" style="height: 40px;"></div>
                 <h2 class="welcome-brand-title">유튜버 세무정석</h2>
                 <p class="welcome-brand-sub" id="welcome-sub-text">다시 오신 것을 환영합니다</p>
             </header>
@@ -462,9 +460,9 @@
                     <div class="price-card"
                         style="background: rgba(255, 255, 255, 0.05); border-radius: 24px; padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid rgba(255, 255, 255, 0.1);">
                         <div class="price-amount"
-                            style="font-size: 1.8rem; font-weight: 800; color: #f59e0b; margin-bottom: 0.2rem;">월 5,900원
+                            style="font-size: 1.8rem; font-weight: 800; color: white; margin-bottom: 0.2rem;">월 5,900원
                         </div>
-                        <div class="price-tagline" style="font-size: 0.9rem; color: #94a3b8;">정기 구독 시 모든 AI 기능 무제한</div>
+                        <div class="price-tagline" style="font-size: 0.9rem; color: #94a3b8;">정기 구독 서비스</div>
                     </div>
                     <button class="btn-yellow-samofit" onclick="window.kodaEngine.tryStartService()">신규 구독 시작하기</button>
                     <div class="footer-link-samofit"
@@ -477,9 +475,7 @@
                 <!-- Login Section (Now Default) -->
                 <form id="login-section" style="display:block; text-align: left;"
                     onsubmit="window.kodaEngine.login(event)">
-                    <div style="display:flex; align-items:center; justify-content: center; margin-bottom: 2rem;">
-                        <h3 style="margin:0; font-size:1.4rem; color:white; font-weight: 800; text-align: center;">
-                            로그인</h3>
+                    <div style="margin-bottom: 2rem;">
                     </div>
 
                     <input type="text" id="login-id" name="username" autocomplete="username" placeholder="아이디"
@@ -583,6 +579,8 @@
                         <input type="text" placeholder="····" maxlength="4" class="input-full"
                             style="flex:1; width:0; text-align:center; letter-spacing:2px;">
                     </div>
+                    <button type="button" class="btn-text-link mt-1" style="color: #94a3b8;"
+                        onclick="kodaEngine.tryStartService()">← 이전으로</button>
                 </div>
                 <div style="display:flex; gap:16px; margin-bottom:1rem;">
                     <div style="flex:1;">
@@ -605,7 +603,6 @@
                         style="width:60px; text-align:center;">
                 </div>
                 <button class="btn-primary w-100" onclick="kodaEngine.confirmSubscription()">5,900원 결제하기</button>
-                <button class="btn-text-link mt-1 w-100" onclick="kodaEngine.tryStartService()">취소</button>
             </div>
 
             <!-- View 3: Account Registration -->
@@ -623,6 +620,8 @@
                         class="input-full mb-2"
                         style="background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.1); color:white; padding:12px; border-radius:12px;"
                         required>
+                    <button type="button" class="btn-text-link mt-1" style="color: #94a3b8;"
+                        onclick="kodaEngine.showCardInput()">← 이전으로</button>
                 </div>
                 <button type="submit" class="btn-primary w-100">계정 생성 및 시작하기</button>
             </form>
