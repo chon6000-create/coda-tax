@@ -665,9 +665,14 @@
     <script>
         window.addEventListener('load', () => {
             kodaEngine.init();
-            // PWA Service Worker Registration
             if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('/coda-tax/sw.js')
+                // Force update service worker if possible
+                navigator.serviceWorker.getRegistrations().then(registrations => {
+                    for (let registration of registrations) {
+                        registration.update();
+                    }
+                });
+                navigator.serviceWorker.register('/coda-tax/sw.js?v=6')
                     .then(reg => console.log('SW Registered', reg))
                     .catch(err => console.error('SW Error', err));
             }
