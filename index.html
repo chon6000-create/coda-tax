@@ -29,7 +29,7 @@
                 });
             }
             // 3. Increment internal version check
-            const CURRENT_VERSION = 'v1003';
+            const CURRENT_VERSION = 'v1004';
             if (localStorage.getItem('app_v') !== CURRENT_VERSION) {
                 localStorage.clear();
                 localStorage.setItem('app_v', CURRENT_VERSION);
@@ -141,8 +141,8 @@
         }
 
         .input-styled {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.05);
             border-radius: 12px;
             color: white;
             padding: 14px;
@@ -206,7 +206,7 @@
                 계정이 없으신가요?
                 <button onclick="kodaEngine.tryStartService()"
                     style="background:none; border:none; color:var(--primary); font-weight:700; cursor:pointer; font-size:1rem;">지금
-                    장부 관리 시작하기</button>
+                    시작하기</button>
             </p>
         </div>
     </div>
