@@ -306,7 +306,7 @@ window.kodaEngine = (() => {
             get('edit-modal').style.display = 'none';
         },
         showYearlyCategorySummary: () => alert("상세 리포트 준비중입니다."),
-        showPrevYearSummary: () => alert("전년도 환급금 계산 준비중입니다."),
+        showPrevYearSummary: () => alert("전년도 세무 리포트 준비중입니다."),
         openHometax: () => window.open('https://www.hometax.go.kr', '_blank'),
         navigate
     };
