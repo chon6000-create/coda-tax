@@ -215,13 +215,27 @@ window.kodaEngine = (() => {
         const id = get('reg-id').value.trim();
         const pw = get('reg-pw').value.trim();
         if (!id || !pw) { alert("아이디/비번을 입력해주세요."); return; }
+
+        // Log to help debug if it fails again
+        console.log("Starting Firebase check...", auth.app.options.projectId);
+
         try {
+            // Ensure email format is strictly valid to avoid internal provider mismatches
             const email = id.includes('@') ? id : `${id}@coda-tax.com`;
-            await createUserWithEmailAndPassword(auth, email, pw);
+            const userCredential = await createUserWithEmailAndPassword(auth, email, pw);
+            console.log("Success:", userCredential.user.uid);
+
             alert("환영합니다! 가입이 완료되었습니다.");
             get('payment-modal').style.display = 'none';
             navigate('/dashboard');
-        } catch (err) { alert("오류: " + err.message); }
+        } catch (err) {
+            console.error("Auth Error Detail:", err.code, err.message);
+            if (err.code === 'auth/configuration-not-found') {
+                alert("Firebase 인증 설정 오류입니다. 관리자에게 문의해주세요. (Email/Password provider missing)");
+            } else {
+                alert("가입 오류: " + err.message);
+            }
+        }
     };
 
     const login = async (e) => {
