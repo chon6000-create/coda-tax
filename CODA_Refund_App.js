@@ -655,9 +655,8 @@ window.kodaEngine = (() => {
     const goBack = () => { navigate('/'); };
 
     const setupCardInputs = () => {
-        // Use more unique IDs to avoid browser autofill confusion
         const cardFields = [
-            'cn-1', 'cn-2', 'cn-3', 'cn-4',
+            'cn1-v6', 'cn2-v6', 'cn3-v6', 'cn4-v6',
             'ce-m', 'ce-y', 'ce-v', 'cp-2'
         ];
 
@@ -665,35 +664,28 @@ window.kodaEngine = (() => {
             const el = get(id);
             if (!el) return;
 
-            // Force clear if it contains non-numeric (to clear autofilled names)
-            if (el.value && /\D/.test(el.value)) {
-                el.value = '';
-            }
+            // Block common autofill behaviors
+            el.addEventListener('focus', () => {
+                if (/\D/.test(el.value)) el.value = '';
+            });
 
             el.addEventListener('input', (e) => {
-                // Clear any non-digits (like Korean names from autofill)
                 let val = e.target.value.replace(/\D/g, '');
                 e.target.value = val;
 
-                // Explicit length checks for auto-advance
-                const maxLen = parseInt(e.target.getAttribute('maxlength'));
-                if (val.length >= maxLen) {
-                    const nextId = cardFields[index + 1];
-                    const next = get(nextId);
+                if (val.length >= e.target.maxLength) {
+                    const next = get(cardFields[index + 1]);
                     if (next) {
                         next.focus();
-                        next.select(); // Better UX
+                        if (next.tagName === 'INPUT') next.select();
                     }
                 }
             });
 
             el.addEventListener('keydown', (e) => {
                 if (e.key === 'Backspace' && e.target.value.length === 0) {
-                    const prevId = cardFields[index - 1];
-                    const prev = get(prevId);
-                    if (prev) {
-                        prev.focus();
-                    }
+                    const prev = get(cardFields[index - 1]);
+                    if (prev) prev.focus();
                 }
             });
         });
