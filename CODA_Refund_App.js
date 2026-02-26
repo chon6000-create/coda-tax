@@ -656,7 +656,7 @@ window.kodaEngine = (() => {
 
     const setupCardInputs = () => {
         const cardFields = [
-            'cn1-v6', 'cn2-v6', 'cn3-v6', 'cn4-v6',
+            'cn1-v7', 'cn2-v7', 'cn3-v7', 'cn4-v7',
             'ce-m', 'ce-y', 'ce-v', 'cp-2'
         ];
 
@@ -720,22 +720,20 @@ window.kodaEngine = (() => {
         try {
             const email = id.includes('@') ? id : `${id}@coda-tax.com`;
             await createUserWithEmailAndPassword(auth, email, pw);
-            alert("가입 및 결제가 완료되었습니다! 환영합니다.");
+            alert("가입 및 결제가 완료되었습니다!");
             get('payment-modal').style.display = 'none';
             navigate('/dashboard');
         } catch (e) {
             console.error("Sign Up Error:", e);
-            let msg = e.message;
+            let msg = "오류가 발생했습니다.";
             if (e.code === 'auth/email-already-in-use') {
-                msg = "이미 사용 중인 아이디입니다. 다른 아이디를 입력해주세요.";
+                msg = "이미 등록된 아이디(중복)입니다. 다른 아이디를 시도해주세요.";
             } else if (e.code === 'auth/weak-password') {
-                msg = "비밀번호가 너무 취약합니다. 6자리 이상으로 설정해주세요.";
+                msg = "비밀번호가 너무 짧거나 취약합니다.";
             } else if (e.code === 'auth/invalid-email') {
-                msg = "올바르지 않은 아이디 형식입니다.";
-            } else if (e.code === 'auth/operation-not-allowed') {
-                msg = "현재 가입이 비활성화되어 있습니다. 관리자에게 문의하세요.";
+                msg = "ID 형식이 올바르지 않습니다.";
             }
-            alert("가입 실패: " + msg);
+            alert("⚠️ " + msg);
         }
     };
 
