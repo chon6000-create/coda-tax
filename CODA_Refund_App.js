@@ -655,76 +655,30 @@ window.kodaEngine = (() => {
     const goBack = () => { navigate('/'); };
 
     const setupCardInputs = () => {
-        const cardNumber = get('card-number');
-        const cardN1 = get('card-n1');
-        const cardFields = ['card-exp-mm', 'card-exp-yy', 'card-cvc', 'card-pw2'];
-        const oldCardFields = ['card-n1', 'card-n2', 'card-n3', 'card-n4'];
+        const cardFields = [
+            'card-n1', 'card-n2', 'card-n3', 'card-n4',
+            'card-exp-mm', 'card-exp-yy', 'card-cvc', 'card-pw2'
+        ];
 
-        // --- NEW: Single Field Layout ---
-        if (cardNumber) {
-            cardNumber.addEventListener('input', (e) => {
-                let v = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
-                let matches = v.match(/\d{4,16}/g);
-                let match = matches && matches[0] || '';
-                let parts = [];
-                for (let i = 0, len = v.length; i < len; i += 4) {
-                    parts.push(v.substring(i, i + 4));
-                }
-                if (parts.length) {
-                    e.target.value = parts.join(' ');
-                } else {
-                    e.target.value = v;
-                }
-                if (v.length >= 16) {
-                    const next = get('card-exp-mm');
-                    if (next) next.focus();
-                }
-            });
-        }
-
-        // --- BACKWARD COMPATIBILITY: 4-Box Layout ---
-        if (cardN1) {
-            oldCardFields.forEach((id, index) => {
-                const el = get(id);
-                if (!el) return;
-                el.addEventListener('input', (e) => {
-                    const val = e.target.value.replace(/\D/g, '');
-                    e.target.value = val;
-                    if (val.length === e.target.maxLength) {
-                        const next = get(oldCardFields[index + 1]) || get('card-exp-mm');
-                        if (next) next.focus();
-                    }
-                });
-                el.addEventListener('keydown', (e) => {
-                    if (e.key === 'Backspace' && e.target.value.length === 0) {
-                        const prev = get(oldCardFields[index - 1]);
-                        if (prev) prev.focus();
-                    }
-                });
-            });
-        }
-
-        // --- Common Fields (Expiry, CVC, PW) ---
         cardFields.forEach((id, index) => {
             const el = get(id);
             if (!el) return;
+
+            // Strict numeric control
             el.addEventListener('input', (e) => {
-                const val = e.target.value.replace(/\D/g, '');
+                let val = e.target.value.replace(/\D/g, '');
                 e.target.value = val;
+
                 if (val.length === e.target.maxLength) {
                     const next = get(cardFields[index + 1]);
                     if (next) next.focus();
                 }
             });
+
             el.addEventListener('keydown', (e) => {
                 if (e.key === 'Backspace' && e.target.value.length === 0) {
-                    if (index === 0) {
-                        const target = get('card-number') || get('card-n4');
-                        if (target) target.focus();
-                    } else {
-                        const prev = get(cardFields[index - 1]);
-                        if (prev) prev.focus();
-                    }
+                    const prev = get(cardFields[index - 1]);
+                    if (prev) prev.focus();
                 }
             });
         });
