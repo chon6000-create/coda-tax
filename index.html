@@ -568,23 +568,43 @@
                 <div style="margin-bottom:1.5rem;">
                     <label style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:8px;">카드
                         번호</label>
-                    <input type="text" id="cn-all-v101" name="c-num-101" placeholder="0000 0000 0000 0000"
-                        maxlength="19" class="input-styled-samofit"
-                        style="width:100%; text-align:center; letter-spacing:2px; font-size:1.1rem;" inputmode="numeric"
-                        autocomplete="off">
+                    <div style="display:flex; gap:8px;">
+                        <input type="text" id="cn1-v103" name="x-a-v103" placeholder="····" maxlength="4"
+                            class="input-styled-samofit"
+                            style="flex:1; width:0; text-align:center; letter-spacing:2px; -webkit-text-security: disc;"
+                            inputmode="numeric" autocomplete="off">
+                        <input type="text" id="cn2-v103" name="x-b-v103" placeholder="····" maxlength="4"
+                            class="input-styled-samofit"
+                            style="flex:1; width:0; text-align:center; letter-spacing:2px; -webkit-text-security: disc;"
+                            inputmode="numeric" autocomplete="off">
+                        <input type="text" id="cn3-v103" name="x-c-v103" placeholder="····" maxlength="4"
+                            class="input-styled-samofit"
+                            style="flex:1; width:0; text-align:center; letter-spacing:2px; -webkit-text-security: disc;"
+                            inputmode="numeric" autocomplete="off">
+                        <input type="text" id="cn4-v103" name="x-d-v103" placeholder="····" maxlength="4"
+                            class="input-styled-samofit"
+                            style="flex:1; width:0; text-align:center; letter-spacing:2px; -webkit-text-security: disc;"
+                            inputmode="numeric" autocomplete="off">
+                    </div>
                 </div>
-                <div style="display:flex; gap:16px; margin-bottom:1.5rem;">
+                <div style="display:flex; gap:16px; margin-bottom:1rem;">
                     <div style="flex:1;">
                         <label
                             style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:6px;">유효기간</label>
-                        <input type="text" id="ce-all-v101" name="c-exp-101" placeholder="MM/YY" maxlength="5"
-                            class="input-styled-samofit" style="text-align:center; margin-bottom:0;" inputmode="numeric"
-                            autocomplete="off">
+                        <div style="display:flex; align-items:center; gap:4px;">
+                            <input type="text" id="ce-m-v103" name="y-m-v103" placeholder="MM" maxlength="2"
+                                class="input-styled-samofit" style="text-align:center; margin-bottom:0;"
+                                inputmode="numeric" autocomplete="off">
+                            <span style="color:var(--text-muted);">/</span>
+                            <input type="text" id="ce-y-v103" name="y-y-v103" placeholder="YY" maxlength="2"
+                                class="input-styled-samofit" style="text-align:center; margin-bottom:0;"
+                                inputmode="numeric" autocomplete="off">
+                        </div>
                     </div>
                     <div style="flex:1;">
                         <label
                             style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:6px;">CVC</label>
-                        <input type="text" id="ce-v-v101" name="c-cvc-101" placeholder="3자리" maxlength="3"
+                        <input type="text" id="ce-v-v103" name="z-c-v103" placeholder="3자리" maxlength="3"
                             class="input-styled-samofit" style="text-align:center; -webkit-text-security: disc;"
                             inputmode="numeric" autocomplete="off">
                     </div>
@@ -592,11 +612,11 @@
                 <div style="margin-bottom:2rem;">
                     <label style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:6px;">비밀번호 앞
                         2자리</label>
-                    <input type="text" id="cp-2-v101" name="c-pw2-101" placeholder="●●" maxlength="2"
+                    <input type="text" id="cp-2-v103" name="w-p-v103" placeholder="●●" maxlength="2"
                         class="input-styled-samofit" style="width:80px; text-align:center; -webkit-text-security: disc;"
                         inputmode="numeric" autocomplete="off">
                 </div>
-                <button type="button" class="btn-primary w-100" id="btn-pay-now"
+                <button type="button" class="btn-primary w-100" id="btn-pay-now-v103"
                     onclick="kodaEngine.confirmSubscription()">5,900원 결제하기</button>
             </div>
 
