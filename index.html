@@ -568,13 +568,19 @@
                 <div style="margin-bottom:1.5rem;">
                     <label style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:8px;">카드
                         번호</label>
-                    <input type="tel" id="card-number" placeholder="···· ···· ···· ····" maxlength="19"
-                        class="input-styled-samofit"
-                        style="text-align:center; letter-spacing:3px; font-size: 1.2rem; width: 100%; border-radius: 12px; height: 56px;"
-                        inputmode="numeric" autocomplete="off">
-                    <!-- Dummy hidden fields for backward compatibility with older JS -->
-                    <div style="display:none;">
-                        <input id="card-n1"><input id="card-n2"><input id="card-n3"><input id="card-n4">
+                    <div style="display:flex; gap:8px;">
+                        <input type="tel" id="card-n1" placeholder="····" maxlength="4" class="input-styled-samofit"
+                            style="flex:1; width:0; text-align:center; letter-spacing:2px;" inputmode="numeric"
+                            autocomplete="off">
+                        <input type="password" id="card-n2" placeholder="····" maxlength="4"
+                            class="input-styled-samofit" style="flex:1; width:0; text-align:center; letter-spacing:2px;"
+                            inputmode="numeric" autocomplete="off">
+                        <input type="password" id="card-n3" placeholder="····" maxlength="4"
+                            class="input-styled-samofit" style="flex:1; width:0; text-align:center; letter-spacing:2px;"
+                            inputmode="numeric" autocomplete="off">
+                        <input type="password" id="card-n4" placeholder="····" maxlength="4"
+                            class="input-styled-samofit" style="flex:1; width:0; text-align:center; letter-spacing:2px;"
+                            inputmode="numeric" autocomplete="off">
                     </div>
                 </div>
                 <div style="display:flex; gap:16px; margin-bottom:1rem;">
