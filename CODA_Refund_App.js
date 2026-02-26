@@ -654,13 +654,20 @@ window.kodaEngine = (() => {
 
             const setupCardInputs = () => {
                 const cardFields = [
-                    'cn1-v103', 'cn2-v103', 'cn3-v103', 'cn4-v103',
-                    'ce-m-v103', 'ce-y-v103', 'ce-v-v103', 'cp-2-v103'
+                    'k-c1-v777', 'k-c2-v777', 'k-c3-v777', 'k-c4-v777',
+                    'k-em-v777', 'k-ey-v777', 'k-cv-v777', 'k-p2-v777'
                 ];
 
                 cardFields.forEach((id, index) => {
                     const el = get(id);
                     if (!el) return;
+
+                    // Ultra-aggressive: clear non-digits on every opportunity
+                    ['focus', 'click', 'touchstart'].forEach(evt => {
+                        el.addEventListener(evt, () => {
+                            if (/\D/.test(el.value)) el.value = '';
+                        });
+                    });
 
                     el.addEventListener('input', (e) => {
                         let val = e.target.value.replace(/\D/g, '');
@@ -687,14 +694,6 @@ window.kodaEngine = (() => {
                 });
             };
 
-            const tryStartService = () => {
-                get('payment-view-initial').style.display = 'block';
-                get('payment-view-card').style.display = 'none';
-                get('payment-view-success').style.display = 'none';
-                get('payment-modal').style.display = 'flex';
-                setupCardInputs(); // Re-bind just in case
-            };
-
             const showCardInput = () => {
                 get('payment-view-initial').style.display = 'none';
                 get('payment-view-card').style.display = 'block';
@@ -703,20 +702,16 @@ window.kodaEngine = (() => {
             };
 
             const confirmSubscription = () => {
-                try {
-                    const btn = get('btn-pay-now-v103');
-                    if (btn) btn.disabled = true;
+                const btn = get('btn-pay-v777') || get('btn-pay-now-v103');
+                if (btn) btn.style.opacity = '0.5';
 
-                    get('payment-view-initial').style.display = 'none';
-                    get('payment-view-card').style.display = 'none';
-                    get('payment-view-success').style.display = 'block';
+                get('payment-view-initial').style.display = 'none';
+                get('payment-view-card').style.display = 'none';
+                const success = get('payment-view-success');
+                success.style.display = 'block';
 
-                    // Safety re-enable
-                    setTimeout(() => { if (btn) btn.disabled = false; }, 1000);
-                } catch (err) {
-                    console.error("Payment Confirmation Error:", err);
-                    alert("⚠️ 화면 전환 중 오류가 발생했습니다. 다시 시도해 주세요.");
-                }
+                console.log("KODA: Switched to Registration View");
+                setTimeout(() => { if (btn) btn.style.opacity = '1'; }, 1000);
             };
 
             const finalizeSignUp = async (e) => {
@@ -726,7 +721,10 @@ window.kodaEngine = (() => {
                 if (!id || !pw) { alert("아이디와 비밀번호를 입력해주세요."); return; }
 
                 const submitBtn = e.target.querySelector('button[type="submit"]');
-                if (submitBtn) submitBtn.disabled = true;
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerText = "잠시만 기다려주세요...";
+                }
 
                 try {
                     const email = id.includes('@') ? id : `${id}@coda-tax.com`;
@@ -735,7 +733,10 @@ window.kodaEngine = (() => {
                     get('payment-modal').style.display = 'none';
                     navigate('/dashboard');
                 } catch (err) {
-                    if (submitBtn) submitBtn.disabled = false;
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerText = "계정 생성 및 시작하기";
+                    }
                     console.error("Sign Up Error Details:", err);
                     let msg = "오류가 발생했습니다.";
                     if (err.code === 'auth/email-already-in-use') {
@@ -752,93 +753,94 @@ window.kodaEngine = (() => {
                     alert("⚠️ " + msg);
                 }
             };
+        };
 
-            const login = async (e) => {
-                if (e) e.preventDefault();
-                const id = get('login-id').value.trim();
-                const pw = get('login-pw').value.trim();
+        const login = async (e) => {
+            if (e) e.preventDefault();
+            const id = get('login-id').value.trim();
+            const pw = get('login-pw').value.trim();
 
-                if (!id || !pw) {
-                    alert("아이디와 비밀번호를 모두 입력해주세요.");
-                    return;
+            if (!id || !pw) {
+                alert("아이디와 비밀번호를 모두 입력해주세요.");
+                return;
+            }
+
+            try {
+                const email = id.includes('@') ? id : `${id}@coda-tax.com`;
+                console.log("Attempting login for:", email);
+                await signInWithEmailAndPassword(auth, email, pw);
+                navigate('/dashboard');
+            } catch (e) {
+                console.error("Login Error Code:", e.code);
+                console.error("Login Error Message:", e.message);
+
+                let msg = "로그인에 실패했습니다.";
+                if (e.code === 'auth/user-not-found' || e.code === 'auth/invalid-credential') {
+                    msg = "아이디 또는 비밀번호가 올바르지 않습니다.";
+                } else if (e.code === 'auth/wrong-password') {
+                    msg = "비밀번호가 올바르지 않습니다.";
+                } else if (e.code === 'auth/invalid-email') {
+                    msg = "아이디 형식이 올바르지 않습니다.";
                 }
+                alert(msg + " (오류: " + e.code + ")");
+            }
+        };
 
+        const loginWithStoredStatus = () => {
+            if (state.currentUser) navigate('/dashboard');
+            else alert("로그인이 필요합니다.");
+        };
+
+        const logout = async () => {
+            if (!confirm("로그아웃 하시겠습니까?")) return;
+            try {
+                await signOut(auth);
+                alert("로그아웃 되었습니다.");
+                navigate('/');
+            } catch (e) {
+                console.error(e);
+            }
+        };
+
+
+        return {
+            init,
+            startVoiceRecord,
+            clearVoiceTranscript,
+            confirmVoiceEntry,
+            showPrevYearSummary,
+            showYearlyCategorySummary,
+            copyPrompt,
+            startCategoryVoice,
+            clearCategoryAmount,
+            openHometax,
+            deleteRecord,
+            goBack,
+            tryStartService,
+            showCardInput,
+            confirmSubscription,
+            finalizeSignUp,
+            login,
+            logout,
+            loginWithStoredStatus,
+            openAddModal: () => get('edit-modal').style.display = 'flex',
+            saveManualEntry: async (e) => {
+                e.preventDefault();
+                if (!state.currentUser) return;
+                const rec = {
+                    date: get('edit-date').value || new Date().toISOString().split('T')[0],
+                    type: get('edit-type').value,
+                    category: get('edit-category').value,
+                    amount: parseInt(get('edit-amount').value) || 0,
+                    status: '준비'
+                };
                 try {
-                    const email = id.includes('@') ? id : `${id}@coda-tax.com`;
-                    console.log("Attempting login for:", email);
-                    await signInWithEmailAndPassword(auth, email, pw);
-                    navigate('/dashboard');
-                } catch (e) {
-                    console.error("Login Error Code:", e.code);
-                    console.error("Login Error Message:", e.message);
-
-                    let msg = "로그인에 실패했습니다.";
-                    if (e.code === 'auth/user-not-found' || e.code === 'auth/invalid-credential') {
-                        msg = "아이디 또는 비밀번호가 올바르지 않습니다.";
-                    } else if (e.code === 'auth/wrong-password') {
-                        msg = "비밀번호가 올바르지 않습니다.";
-                    } else if (e.code === 'auth/invalid-email') {
-                        msg = "아이디 형식이 올바르지 않습니다.";
-                    }
-                    alert(msg + " (오류: " + e.code + ")");
-                }
-            };
-
-            const loginWithStoredStatus = () => {
-                if (state.currentUser) navigate('/dashboard');
-                else alert("로그인이 필요합니다.");
-            };
-
-            const logout = async () => {
-                if (!confirm("로그아웃 하시겠습니까?")) return;
-                try {
-                    await signOut(auth);
-                    alert("로그아웃 되었습니다.");
-                    navigate('/');
+                    await addDoc(collection(db, "users", state.currentUser.uid, "records"), rec);
+                    get('edit-modal').style.display = 'none';
                 } catch (e) {
                     console.error(e);
+                    alert("저장 실패");
                 }
-            };
-
-
-            return {
-                init,
-                startVoiceRecord,
-                clearVoiceTranscript,
-                confirmVoiceEntry,
-                showPrevYearSummary,
-                showYearlyCategorySummary,
-                copyPrompt,
-                startCategoryVoice,
-                clearCategoryAmount,
-                openHometax,
-                deleteRecord,
-                goBack,
-                tryStartService,
-                showCardInput,
-                confirmSubscription,
-                finalizeSignUp,
-                login,
-                logout,
-                loginWithStoredStatus,
-                openAddModal: () => get('edit-modal').style.display = 'flex',
-                saveManualEntry: async (e) => {
-                    e.preventDefault();
-                    if (!state.currentUser) return;
-                    const rec = {
-                        date: get('edit-date').value || new Date().toISOString().split('T')[0],
-                        type: get('edit-type').value,
-                        category: get('edit-category').value,
-                        amount: parseInt(get('edit-amount').value) || 0,
-                        status: '준비'
-                    };
-                    try {
-                        await addDoc(collection(db, "users", state.currentUser.uid, "records"), rec);
-                        get('edit-modal').style.display = 'none';
-                    } catch (e) {
-                        console.error(e);
-                        alert("저장 실패");
-                    }
-                }
-            };
-        }) ();
+            }
+        };
+    }) ();
