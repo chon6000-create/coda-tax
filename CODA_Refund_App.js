@@ -655,34 +655,32 @@ window.kodaEngine = (() => {
     const goBack = () => { navigate('/'); };
 
     const setupCardInputs = () => {
-        const cardFields = [
-            'cn1-v100', 'cn2-v100', 'cn3-v100', 'cn4-v100',
-            'ce-m-v100', 'ce-y-v100', 'ce-v-v100', 'cp-2-v100'
-        ];
+        const cardNum = get('cn-all-v101');
+        const cardExp = get('ce-all-v101');
 
-        cardFields.forEach((id, index) => {
-            const el = get(id);
-            if (!el) return;
-
-            el.addEventListener('input', (e) => {
+        if (cardNum) {
+            cardNum.addEventListener('input', (e) => {
                 let val = e.target.value.replace(/\D/g, '');
-                e.target.value = val;
+                let formatted = val.match(/.{1,4}/g)?.join(' ') || val;
+                e.target.value = formatted.substring(0, 19);
+            });
+        }
 
-                if (val.length >= e.target.maxLength) {
-                    const next = get(cardFields[index + 1]);
-                    if (next) {
-                        next.focus();
-                        if (next.tagName === 'INPUT') next.select();
-                    }
+        if (cardExp) {
+            cardExp.addEventListener('input', (e) => {
+                let val = e.target.value.replace(/\D/g, '');
+                if (val.length >= 2) {
+                    e.target.value = val.substring(0, 2) + '/' + val.substring(2, 4);
+                } else {
+                    e.target.value = val;
                 }
             });
+        }
 
-            el.addEventListener('keydown', (e) => {
-                if (e.key === 'Backspace' && e.target.value.length === 0) {
-                    const prev = get(cardFields[index - 1]);
-                    if (prev) prev.focus();
-                }
-            });
+        // Generic numeric filter for CVC/PW2
+        ['ce-v-v101', 'cp-2-v101'].forEach(id => {
+            const el = get(id);
+            if (el) el.addEventListener('input', (e) => e.target.value = e.target.value.replace(/\D/g, ''));
         });
     };
 
@@ -698,12 +696,24 @@ window.kodaEngine = (() => {
         get('payment-view-initial').style.display = 'none';
         get('payment-view-card').style.display = 'block';
         get('payment-view-success').style.display = 'none';
+        setupCardInputs();
     };
 
     const confirmSubscription = () => {
-        get('payment-view-initial').style.display = 'none';
-        get('payment-view-card').style.display = 'none';
-        get('payment-view-success').style.display = 'block';
+        try {
+            const btn = get('btn-pay-now');
+            if (btn) btn.disabled = true;
+
+            get('payment-view-initial').style.display = 'none';
+            get('payment-view-card').style.display = 'none';
+            get('payment-view-success').style.display = 'block';
+
+            // Re-enable button in case they go back
+            setTimeout(() => { if (btn) btn.disabled = false; }, 1000);
+        } catch (err) {
+            console.error("Payment Confirmation Error:", err);
+            alert("⚠️ 화면 전환 중 오류가 발생했습니다. 다시 시도해 주세요.");
+        }
     };
 
     const finalizeSignUp = async (e) => {
@@ -712,6 +722,9 @@ window.kodaEngine = (() => {
         const pw = get('reg-pw').value.trim();
         if (!id || !pw) { alert("아이디와 비밀번호를 입력해주세요."); return; }
 
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        if (submitBtn) submitBtn.disabled = true;
+
         try {
             const email = id.includes('@') ? id : `${id}@coda-tax.com`;
             await createUserWithEmailAndPassword(auth, email, pw);
@@ -719,6 +732,7 @@ window.kodaEngine = (() => {
             get('payment-modal').style.display = 'none';
             navigate('/dashboard');
         } catch (err) {
+            if (submitBtn) submitBtn.disabled = false;
             console.error("Sign Up Error Details:", err);
             let msg = "오류가 발생했습니다.";
             if (err.code === 'auth/email-already-in-use') {

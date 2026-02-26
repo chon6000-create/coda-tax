@@ -568,55 +568,36 @@
                 <div style="margin-bottom:1.5rem;">
                     <label style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:8px;">카드
                         번호</label>
-                    <div style="display:flex; gap:8px;">
-                        <input type="text" id="cn1-v100" name="c-num-100-1" placeholder="····" maxlength="4"
-                            class="input-styled-samofit"
-                            style="flex:1; width:0; text-align:center; letter-spacing:2px; -webkit-text-security: disc;"
-                            inputmode="numeric" autocomplete="new-password">
-                        <input type="text" id="cn2-v100" name="c-num-100-2" placeholder="····" maxlength="4"
-                            class="input-styled-samofit"
-                            style="flex:1; width:0; text-align:center; letter-spacing:2px; -webkit-text-security: disc;"
-                            inputmode="numeric" autocomplete="new-password">
-                        <input type="text" id="cn3-v100" name="c-num-100-3" placeholder="····" maxlength="4"
-                            class="input-styled-samofit"
-                            style="flex:1; width:0; text-align:center; letter-spacing:2px; -webkit-text-security: disc;"
-                            inputmode="numeric" autocomplete="new-password">
-                        <input type="text" id="cn4-v100" name="c-num-100-4" placeholder="····" maxlength="4"
-                            class="input-styled-samofit"
-                            style="flex:1; width:0; text-align:center; letter-spacing:2px; -webkit-text-security: disc;"
-                            inputmode="numeric" autocomplete="new-password">
-                    </div>
+                    <input type="text" id="cn-all-v101" name="c-num-101" placeholder="0000 0000 0000 0000"
+                        maxlength="19" class="input-styled-samofit"
+                        style="width:100%; text-align:center; letter-spacing:2px; font-size:1.1rem;" inputmode="numeric"
+                        autocomplete="off">
                 </div>
-                <div style="display:flex; gap:16px; margin-bottom:1rem;">
+                <div style="display:flex; gap:16px; margin-bottom:1.5rem;">
                     <div style="flex:1;">
                         <label
                             style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:6px;">유효기간</label>
-                        <div style="display:flex; align-items:center; gap:4px;">
-                            <input type="text" id="ce-m-v100" name="c-exp-m-100" placeholder="MM" maxlength="2"
-                                class="input-styled-samofit" style="text-align:center; margin-bottom:0;"
-                                inputmode="numeric" autocomplete="new-password">
-                            <span style="color:var(--text-muted);">/</span>
-                            <input type="text" id="ce-y-v100" name="c-exp-y-100" placeholder="YY" maxlength="2"
-                                class="input-styled-samofit" style="text-align:center; margin-bottom:0;"
-                                inputmode="numeric" autocomplete="new-password">
-                        </div>
+                        <input type="text" id="ce-all-v101" name="c-exp-101" placeholder="MM/YY" maxlength="5"
+                            class="input-styled-samofit" style="text-align:center; margin-bottom:0;" inputmode="numeric"
+                            autocomplete="off">
                     </div>
                     <div style="flex:1;">
                         <label
                             style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:6px;">CVC</label>
-                        <input type="text" id="ce-v-v100" name="c-cvc-100" placeholder="3자리" maxlength="3"
+                        <input type="text" id="ce-v-v101" name="c-cvc-101" placeholder="3자리" maxlength="3"
                             class="input-styled-samofit" style="text-align:center; -webkit-text-security: disc;"
-                            inputmode="numeric" autocomplete="new-password">
+                            inputmode="numeric" autocomplete="off">
                     </div>
                 </div>
-                <div style="margin-bottom:1.5rem;">
+                <div style="margin-bottom:2rem;">
                     <label style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:6px;">비밀번호 앞
                         2자리</label>
-                    <input type="text" id="cp-2-v100" name="c-pw2-100" placeholder="●●" maxlength="2"
+                    <input type="text" id="cp-2-v101" name="c-pw2-101" placeholder="●●" maxlength="2"
                         class="input-styled-samofit" style="width:80px; text-align:center; -webkit-text-security: disc;"
-                        inputmode="numeric" autocomplete="new-password">
+                        inputmode="numeric" autocomplete="off">
                 </div>
-                <button class="btn-primary w-100" onclick="kodaEngine.confirmSubscription()">5,900원 결제하기</button>
+                <button type="button" class="btn-primary w-100" id="btn-pay-now"
+                    onclick="kodaEngine.confirmSubscription()">5,900원 결제하기</button>
             </div>
 
             <!-- View 3: Account Registration -->
@@ -624,10 +605,10 @@
                 style="display:none; text-align:center;">
                 <div style="display:flex; align-items:center; margin-bottom:1.5rem;">
                     <button class="btn-back-arrow" type="button" onclick="kodaEngine.showCardInput()">←</button>
-                    <h3 style="margin:0; text-align:center; flex:1; margin-right:32px;">결제 성공!</h3>
+                    <h3 style="margin:0; text-align:center; flex:1; margin-right:32px;">결제 완료!</h3>
                 </div>
-                <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:1.5rem;">사용하실 단독 아이디와
-                    비밀번호를<br>설정해주세요</p>
+                <p style="color:var(--text-white); font-weight:600; font-size:1rem; margin-bottom:0.5rem;">축하합니다!</p>
+                <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:1.5rem;">사용하실 아이디와 비밀번호를 설정해주세요</p>
                 <div style="text-align:left;">
                     <input type="text" id="reg-id" name="koda-username-v100" autocomplete="off" placeholder="신규 아이디"
                         class="input-styled-samofit mb-1" style="padding:12px;" required>
