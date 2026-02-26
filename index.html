@@ -4,11 +4,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- MASTER CACHE BREAK -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
+
+    <script>
+        // TOTAL CACHE DESTRUCTION SCRIPT
+        (function () {
+            // 1. Unregister all Service Workers
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(function (registrations) {
+                    for (let registration of registrations) {
+                        registration.unregister();
+                        console.log("ServiceWorker unregistered");
+                    }
+                });
+            }
+            // 2. Clear all Caches
+            if ('caches' in window) {
+                caches.keys().then(function (names) {
+                    for (let name of names) caches.delete(name);
+                    console.log("Caches cleared");
+                });
+            }
+            // 3. Increment internal version check
+            const CURRENT_VERSION = 'v1002';
+            if (localStorage.getItem('app_v') !== CURRENT_VERSION) {
+                localStorage.clear();
+                localStorage.setItem('app_v', CURRENT_VERSION);
+                location.reload(true); // Force hard reload
+            }
+        })();
+    </script>
+
     <title>세무정석 - 유튜버 환급 도우미</title>
-    <link rel="stylesheet" href="KodaFix.css?v=999">
+    <link rel="stylesheet" href="SeomuFix.css?v=1002">
     <link rel="stylesheet" as="style" crossorigin
         href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     <style>
@@ -161,10 +192,28 @@
             max-width: 400px;
             text-align: center;
         }
+
+        /* Emergency Refresh Button */
+        #emergency-refresh {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--danger);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 10px;
+            z-index: 9999;
+            opacity: 0.5;
+            cursor: pointer;
+        }
     </style>
 </head>
 
 <body>
+    <button id="emergency-refresh" onclick="localStorage.clear(); sessionStorage.clear(); location.reload(true);">강제
+        초기화</button>
+
     <!-- 1. Landing Screen -->
     <div id="user-type-overlay" class="welcome-overlay">
         <div class="welcome-card">
@@ -350,7 +399,7 @@
         </div>
     </div>
 
-    <script type="module" src="KodaFix.js?v=999"></script>
+    <script type="module" src="SeomuFix.js?v=1002"></script>
     <style>
         @keyframes pulse {
             0% {
