@@ -135,6 +135,12 @@
             cursor: pointer;
         }
 
+        /* Ensure certain inputs are NOT masked */
+        input.not-masked {
+            -webkit-text-security: none !important;
+            text-security: none !important;
+        }
+
         .welcome-overlay {
             position: fixed;
             inset: 0;
@@ -266,10 +272,10 @@
                     <div style="flex:1;">
                         <label style="font-size:0.8rem; color:var(--text-muted);">유효기간</label>
                         <div style="display:flex; align-items:center; gap:4px; margin-top:4px;">
-                            <input type="text" id="k-em-v999" maxlength="2" placeholder="MM" class="input-styled"
-                                style="width:50px; text-align:center;">
-                            <input type="text" id="k-ey-v999" maxlength="2" placeholder="YY" class="input-styled"
-                                style="width:50px; text-align:center;">
+                            <input type="text" id="k-em-v999" maxlength="2" placeholder="MM"
+                                class="input-styled not-masked" style="width:50px; text-align:center;">
+                            <input type="text" id="k-ey-v999" maxlength="2" placeholder="YY"
+                                class="input-styled not-masked" style="width:50px; text-align:center;">
                         </div>
                     </div>
                     <div style="flex:1;">
