@@ -655,30 +655,45 @@ window.kodaEngine = (() => {
     const goBack = () => { navigate('/'); };
 
     const setupCardInputs = () => {
+        // Use more unique IDs to avoid browser autofill confusion
         const cardFields = [
-            'card-n1', 'card-n2', 'card-n3', 'card-n4',
-            'card-exp-mm', 'card-exp-yy', 'card-cvc', 'card-pw2'
+            'cn-1', 'cn-2', 'cn-3', 'cn-4',
+            'ce-m', 'ce-y', 'ce-v', 'cp-2'
         ];
 
         cardFields.forEach((id, index) => {
             const el = get(id);
             if (!el) return;
 
-            // Strict numeric control
+            // Force clear if it contains non-numeric (to clear autofilled names)
+            if (el.value && /\D/.test(el.value)) {
+                el.value = '';
+            }
+
             el.addEventListener('input', (e) => {
+                // Clear any non-digits (like Korean names from autofill)
                 let val = e.target.value.replace(/\D/g, '');
                 e.target.value = val;
 
-                if (val.length === e.target.maxLength) {
-                    const next = get(cardFields[index + 1]);
-                    if (next) next.focus();
+                // Explicit length checks for auto-advance
+                const maxLen = parseInt(e.target.getAttribute('maxlength'));
+                if (val.length >= maxLen) {
+                    const nextId = cardFields[index + 1];
+                    const next = get(nextId);
+                    if (next) {
+                        next.focus();
+                        next.select(); // Better UX
+                    }
                 }
             });
 
             el.addEventListener('keydown', (e) => {
                 if (e.key === 'Backspace' && e.target.value.length === 0) {
-                    const prev = get(cardFields[index - 1]);
-                    if (prev) prev.focus();
+                    const prevId = cardFields[index - 1];
+                    const prev = get(prevId);
+                    if (prev) {
+                        prev.focus();
+                    }
                 }
             });
         });
@@ -711,15 +726,24 @@ window.kodaEngine = (() => {
         if (!id || !pw) { alert("아이디와 비밀번호를 입력해주세요."); return; }
 
         try {
-            // Firebase Auth requires an email format, we'll append a domain if it's just an ID
             const email = id.includes('@') ? id : `${id}@coda-tax.com`;
             await createUserWithEmailAndPassword(auth, email, pw);
             alert("가입 및 결제가 완료되었습니다! 환영합니다.");
             get('payment-modal').style.display = 'none';
             navigate('/dashboard');
         } catch (e) {
-            console.error(e);
-            alert("가입 실패: " + e.message);
+            console.error("Sign Up Error:", e);
+            let msg = e.message;
+            if (e.code === 'auth/email-already-in-use') {
+                msg = "이미 사용 중인 아이디입니다. 다른 아이디를 입력해주세요.";
+            } else if (e.code === 'auth/weak-password') {
+                msg = "비밀번호가 너무 취약합니다. 6자리 이상으로 설정해주세요.";
+            } else if (e.code === 'auth/invalid-email') {
+                msg = "올바르지 않은 아이디 형식입니다.";
+            } else if (e.code === 'auth/operation-not-allowed') {
+                msg = "현재 가입이 비활성화되어 있습니다. 관리자에게 문의하세요.";
+            }
+            alert("가입 실패: " + msg);
         }
     };
 

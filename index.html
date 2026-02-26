@@ -569,18 +569,18 @@
                     <label style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:8px;">카드
                         번호</label>
                     <div style="display:flex; gap:8px;">
-                        <input type="tel" id="card-n1" placeholder="····" maxlength="4" class="input-styled-samofit"
-                            style="flex:1; width:0; text-align:center; letter-spacing:2px;" inputmode="numeric"
-                            autocomplete="off">
-                        <input type="password" id="card-n2" placeholder="····" maxlength="4"
+                        <input type="tel" id="cn-1" name="n1" placeholder="····" maxlength="4"
                             class="input-styled-samofit" style="flex:1; width:0; text-align:center; letter-spacing:2px;"
-                            inputmode="numeric" autocomplete="off">
-                        <input type="password" id="card-n3" placeholder="····" maxlength="4"
+                            inputmode="numeric" autocomplete="one-time-code">
+                        <input type="password" id="cn-2" name="n2" placeholder="····" maxlength="4"
                             class="input-styled-samofit" style="flex:1; width:0; text-align:center; letter-spacing:2px;"
-                            inputmode="numeric" autocomplete="off">
-                        <input type="password" id="card-n4" placeholder="····" maxlength="4"
+                            inputmode="numeric" autocomplete="one-time-code">
+                        <input type="password" id="cn-3" name="n3" placeholder="····" maxlength="4"
                             class="input-styled-samofit" style="flex:1; width:0; text-align:center; letter-spacing:2px;"
-                            inputmode="numeric" autocomplete="off">
+                            inputmode="numeric" autocomplete="one-time-code">
+                        <input type="password" id="cn-4" name="n4" placeholder="····" maxlength="4"
+                            class="input-styled-samofit" style="flex:1; width:0; text-align:center; letter-spacing:2px;"
+                            inputmode="numeric" autocomplete="one-time-code">
                     </div>
                 </div>
                 <div style="display:flex; gap:16px; margin-bottom:1rem;">
@@ -588,27 +588,29 @@
                         <label
                             style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:6px;">유효기간</label>
                         <div style="display:flex; align-items:center; gap:4px;">
-                            <input type="tel" id="card-exp-mm" placeholder="MM" maxlength="2"
+                            <input type="tel" id="ce-m" name="em" placeholder="MM" maxlength="2"
                                 class="input-styled-samofit" style="text-align:center; margin-bottom:0;"
-                                inputmode="numeric">
+                                inputmode="numeric" autocomplete="one-time-code">
                             <span style="color:var(--text-muted);">/</span>
-                            <input type="tel" id="card-exp-yy" placeholder="YY" maxlength="2"
+                            <input type="tel" id="ce-y" name="ey" placeholder="YY" maxlength="2"
                                 class="input-styled-samofit" style="text-align:center; margin-bottom:0;"
-                                inputmode="numeric">
+                                inputmode="numeric" autocomplete="one-time-code">
                         </div>
                     </div>
                     <div style="flex:1;">
                         <label
                             style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:6px;">CVC</label>
-                        <input type="password" id="card-cvc" placeholder="3자리" maxlength="3"
-                            class="input-styled-samofit" style="text-align:center;" inputmode="numeric">
+                        <input type="password" id="ce-v" name="cv" placeholder="3자리" maxlength="3"
+                            class="input-styled-samofit" style="text-align:center;" inputmode="numeric"
+                            autocomplete="one-time-code">
                     </div>
                 </div>
                 <div style="margin-bottom:1.5rem;">
                     <label style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:6px;">비밀번호 앞
                         2자리</label>
-                    <input type="password" id="card-pw2" placeholder="●●" maxlength="2" class="input-styled-samofit"
-                        style="width:80px; text-align:center;" inputmode="numeric">
+                    <input type="password" id="cp-2" name="p2" placeholder="●●" maxlength="2"
+                        class="input-styled-samofit" style="width:80px; text-align:center;" inputmode="numeric"
+                        autocomplete="one-time-code">
                 </div>
                 <button class="btn-primary w-100" onclick="kodaEngine.confirmSubscription()">5,900원 결제하기</button>
             </div>
@@ -621,7 +623,7 @@
                     <h3 style="margin:0; text-align:center; flex:1; margin-right:32px;">결제 성공!</h3>
                 </div>
                 <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:1.5rem;">사용하실 단독 아이디와 비밀번호를<br>설정해주세요
-                    (실명 무관)</p>
+                    (비밀번호 6자리 이상 설정 필수)</p>
                 <div style="text-align:left;">
                     <input type="text" id="reg-id" name="username" autocomplete="username" placeholder="신규 아이디"
                         class="input-styled-samofit mb-1" style="padding:12px;" required>
