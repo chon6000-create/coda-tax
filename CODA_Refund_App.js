@@ -663,16 +663,21 @@ window.kodaEngine = (() => {
         // --- NEW: Single Field Layout ---
         if (cardNumber) {
             cardNumber.addEventListener('input', (e) => {
-                let value = e.target.value.replace(/\D/g, '');
-                let formatted = '';
-                for (let i = 0; i < value.length; i++) {
-                    if (i > 0 && i % 4 === 0) formatted += ' ';
-                    formatted += value[i];
+                let v = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+                let matches = v.match(/\d{4,16}/g);
+                let match = matches && matches[0] || '';
+                let parts = [];
+                for (let i = 0, len = v.length; i < len; i += 4) {
+                    parts.push(v.substring(i, i + 4));
                 }
-                e.target.value = formatted;
-                if (value.length >= 16) {
-                    const expiryMM = get('card-exp-mm');
-                    if (expiryMM) expiryMM.focus();
+                if (parts.length) {
+                    e.target.value = parts.join(' ');
+                } else {
+                    e.target.value = v;
+                }
+                if (v.length >= 16) {
+                    const next = get('card-exp-mm');
+                    if (next) next.focus();
                 }
             });
         }
