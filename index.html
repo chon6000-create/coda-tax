@@ -3,18 +3,12 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>유튜버 세무정석 - Coda</title>
-
-    <!-- PWA Meta Tags -->
-    <link rel="manifest" href="/coda-tax/manifest.json">
-    <meta name="theme-color" content="#10b981">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="세무정석">
-
-    <link rel="stylesheet" href="CODA_Refund_Style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>코다 (CODA) - 유튜버 환급 도우미</title>
+    <link rel="stylesheet" href="KodaFix.css?v=999">
     <link rel="stylesheet" as="style" crossorigin
         href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     <style>
@@ -23,679 +17,352 @@
             --bg-card: #111827;
             --text-primary: #F9FAFB;
             --text-muted: #9CA3AF;
-            --primary: #1E3A8A;
+            --primary: #3B82F6;
             --accent: #3B82F6;
             --success: #10b981;
             --danger: #ef4444;
-            --font-heading: 'Pretendard', sans-serif;
-            --font-body: 'Pretendard', sans-serif;
         }
 
-        .delete-btn {
-            background: rgba(0, 0, 0, 0.4);
-            color: rgba(255, 255, 255, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            width: 22px;
-            height: 22px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 0.75rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* Transcription Display Box */
-        .voice-transcription-container {
-            position: relative;
-            width: 100%;
-            margin-bottom: 2rem;
-        }
-
-        #voice-transcribed-text {
-            width: 100%;
-            min-height: 120px;
-            padding: 24px 48px 24px 24px;
-            border-radius: 16px;
-            background: rgba(255, 255, 255, 0.02);
-            border: 2px solid rgba(59, 130, 246, 0.2);
+        body {
+            background: var(--bg-main);
             color: var(--text-primary);
-            font-size: 1.5rem;
-            font-weight: 700;
-            text-align: center;
-            display: none;
-            align-items: center;
-            justify-content: center;
+            font-family: 'Pretendard', sans-serif;
+            margin: 0;
+            -webkit-font-smoothing: antialiased;
         }
 
-        .btn-retry-x {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            background: rgba(239, 68, 68, 0.1);
-            color: #ef4444;
-            border: 1px solid rgba(239, 68, 68, 0.2);
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            font-size: 1rem;
-            font-weight: 900;
-            cursor: pointer;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 10;
-        }
-
-        #voice-status-text {
-            animation: pulseOpacity 1.5s infinite ease-in-out;
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-        }
-
-        @keyframes pulseOpacity {
-            0% {
-                opacity: 0.5;
-            }
-
-            50% {
-                opacity: 1;
-            }
-
-            100% {
-                opacity: 0.5;
-            }
-        }
-
-        /* Quick-Links Dashboard Footer */
-        .dashboard-quick-footer {
+        .app-container {
+            max-width: 480px;
+            margin: 0 auto;
+            min-height: 100vh;
+            padding: 1.5rem;
+            box-sizing: border-box;
             display: flex;
-            gap: 12px;
-            margin-top: 2rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            flex-direction: column;
         }
 
-        .btn-quick-link {
-            flex: 1;
-            padding: 16px;
-            border-radius: 14px;
-            font-size: 0.95rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        .btn-quick-link.left {
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text-muted);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .btn-quick-link.right {
-            background: #003c71;
-            /* Hometax Navy */
+        .btn-primary {
+            background: var(--primary);
             color: white;
             border: none;
-        }
-
-        .btn-quick-link:hover {
-            transform: translateY(-2px);
-            filter: brightness(1.2);
-        }
-
-        /* Summary Table in Modal */
-        .summary-table-container {
-            max-height: 400px;
-            overflow-y: auto;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 16px;
-            margin-bottom: 1rem;
-        }
-
-        .modal-scrollable {
-            display: flex;
-            flex-direction: column;
-            max-height: 85vh;
-            overflow-y: auto;
-        }
-
-
-        .summary-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .summary-table th {
-            text-align: left;
-            padding: 12px;
-            color: var(--text-muted);
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .summary-table td {
-            padding: 14px 12px;
-            font-size: 0.95rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-        }
-
-        .row-income {
-            background: rgba(16, 185, 129, 0.05);
-            border-left: 3px solid var(--success);
-        }
-
-        .btn-item-mic {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: white;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-        }
-
-        .btn-item-mic:hover {
-            background: var(--accent);
-            transform: scale(1.1);
-        }
-
-        .rec-dot {
-            display: inline-block;
-            width: 10px;
-            height: 10px;
-            background: #ef4444;
-            border-radius: 50%;
-            margin-right: 8px;
-            animation: recBlink 1s infinite;
-        }
-
-        /* Quick Links Restructuring */
-        .quick-links-mvp {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin-top: 0;
-            margin-bottom: 2rem;
-            width: 100%;
-        }
-
-        .btn-quick-icon {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 16px;
-            padding: 16px 8px;
-            color: var(--text-primary);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-align: center;
-            line-height: 1.2;
-        }
-
-        .btn-quick-icon:hover {
-            background: rgba(255, 255, 255, 0.06);
-            transform: translateY(-2px);
-        }
-
-        .btn-quick-icon span {
-            font-size: 1.5rem;
-        }
-
-        @keyframes recBlink {
-            0% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: 0.3;
-            }
-
-            100% {
-                opacity: 1;
-            }
-        }
-
-        .hometax-box-badge {
-            background: rgba(30, 58, 138, 0.4);
-            color: #60A5FA;
-            padding: 2px 7px;
-            border-radius: 4px;
-            font-family: 'JetBrains Mono', monospace;
+            padding: 1rem;
+            border-radius: 12px;
             font-weight: 700;
-            font-size: 0.75rem;
-            margin-right: 6px;
-            border: 1px solid rgba(59, 130, 246, 0.2);
+            cursor: pointer;
+            transition: opacity 0.2s;
         }
 
-        /* Period Detail List Styling */
-        .period-detail-list {
-            margin-top: 1.5rem;
-            max-height: 200px;
-            overflow-y: auto;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-            padding-top: 1rem;
+        .btn-primary:active {
+            opacity: 0.8;
         }
 
-        .period-detail-item {
-            display: grid;
-            grid-template-columns: 50px 1fr auto;
-            align-items: center;
-            padding: 8px 0;
-            font-size: 0.85rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.02);
-            color: var(--text-primary);
-        }
-
-        .period-detail-item:last-child {
-            border-bottom: none;
-        }
-
-        .period-detail-item .date {
-            color: var(--text-muted);
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.75rem;
-        }
-
-        .period-detail-item .cat-label {
-            display: inline-block;
+        .input-styled {
             background: rgba(255, 255, 255, 0.05);
-            padding: 2px 8px;
-            border-radius: 6px;
-            font-size: 0.7rem;
-            margin-left: 8px;
-            color: var(--text-muted);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: white;
+            padding: 14px;
+            box-sizing: border-box;
         }
 
-        .period-detail-item .amt {
-            font-weight: 700;
-            font-family: 'JetBrains Mono', monospace;
+        .input-styled:focus {
+            outline: none;
+            border-color: var(--primary);
         }
 
-        .amt.income {
-            color: var(--success);
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 5000;
+            padding: 20px;
         }
 
-        .amt.expense {
-            color: var(--text-primary);
+        .modal-content {
+            background: var(--bg-card);
+            border-radius: 32px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 400px;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .period-empty-msg {
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 0.8rem;
-            padding: 1rem 0;
-        }
-
-        .btn-back-arrow {
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
             background: none;
             border: none;
             color: var(--text-muted);
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             cursor: pointer;
-            padding: 0;
-            margin-right: 12px;
+        }
+
+        .records-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .records-table td {
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .cell-date {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .cell-amt {
+            text-align: right;
+            font-weight: 700;
+        }
+
+        .cell-type.income {
+            color: var(--success);
+        }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        .welcome-overlay {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-main);
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: color 0.2s;
+            z-index: 2000;
         }
 
-        .btn-back-arrow:hover {
-            color: var(--accent);
+        .welcome-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 40px;
+            padding: 3rem 2rem;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
         }
     </style>
 </head>
 
 <body>
-    <div class="bg-decor">
-        <div class="blob blob-1"></div>
-        <div class="blob blob-2"></div>
-        <div class="blob blob-3"></div>
+    <!-- 1. Landing Screen -->
+    <div id="user-type-overlay" class="welcome-overlay">
+        <div class="welcome-card">
+            <h1 style="font-size:3rem; font-weight:900; margin-bottom:0.5rem; letter-spacing:-0.1em;">CODA</h1>
+            <p style="color:var(--text-muted); margin-bottom:2.5rem;">유튜버 환급 도우미</p>
+
+            <form onsubmit="kodaEngine.login(event)" style="text-align:left;">
+                <input type="text" id="login-id" placeholder="아이디" class="input-styled"
+                    style="width:100%; margin-bottom:10px;">
+                <input type="password" id="login-pw" placeholder="비밀번호" class="input-styled"
+                    style="width:100%; margin-bottom:20px;">
+                <button type="submit" class="btn-primary" style="width:100%;">로그인</button>
+            </form>
+
+            <p style="margin-top:2rem; font-size:0.9rem; color:var(--text-muted);">
+                계정이 없으신가요?
+                <button onclick="kodaEngine.tryStartService()"
+                    style="background:none; border:none; color:var(--primary); font-weight:700; cursor:pointer;">지금
+                    시작하기</button>
+            </p>
+        </div>
     </div>
 
-    <div id="app-root">
-        <div id="app-container" class="app-container" style="display:none;">
-            <section id="view-records" class="app-view">
-                <header class="main-header"
-                    style="justify-content: space-between; align-items: center; padding: 1.5rem 1rem;">
-                    <div class="logo-area" style="display:flex; align-items:center;">
-                        <button class="btn-back-arrow" onclick="kodaEngine.goBack()">←</button>
-                        <div style="display:flex; flex-direction:column;">
-                            <h1>유튜버 <span style="font-weight:400;">세무정석</span></h1>
-                            <div id="user-status-indicator"
-                                style="font-size:0.7rem; color:var(--accent); font-weight:700; display:none;">
-                                <span id="logged-in-user-id"></span> 님 로그인 중
-                                <button onclick="kodaEngine.logout()"
-                                    style="background:none; border:none; color:var(--text-muted); font-size:0.65rem; text-decoration:underline; margin-left:8px; cursor:pointer; padding:0;">로그아웃</button>
-                            </div>
+    <!-- 2. Main Dashboard -->
+    <div id="app-container" class="app-container" style="display:none;">
+        <header style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3rem;">
+            <h1 style="font-size:1.5rem; font-weight:900;">CODA</h1>
+            <div id="user-status-indicator" style="font-size:0.8rem; color:var(--text-muted);">
+                <span id="logged-in-user-id"></span>님
+                <button onclick="kodaEngine.logout()"
+                    style="margin-left:8px; border:none; background:none; color:var(--danger); cursor:pointer;">로그아웃</button>
+            </div>
+        </header>
+
+        <section style="text-align:center; margin-bottom:4rem;">
+            <div style="position:relative; display:inline-block; margin-bottom:1.5rem;">
+                <div
+                    style="position:absolute; inset:-15px; background:var(--primary); opacity:0.2; border-radius:50%; animation: pulse 2s infinite;">
+                </div>
+                <button onclick="kodaEngine.startVoiceRecord()"
+                    style="width:100px; height:100px; border-radius:50%; background:var(--primary); border:none; color:white; font-size:2.5rem; cursor:pointer; position:relative;">🎙️</button>
+            </div>
+            <h2 style="font-size:1.2rem; font-weight:700;">내역 말하기</h2>
+            <p style="color:var(--text-muted); font-size:0.9rem;">"소품비 3만원", "애드센스 100만원"</p>
+            <button onclick="kodaEngine.openAddModal()"
+                style="margin-top:1.5rem; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:var(--text-muted); padding:10px 20px; border-radius:20px; cursor:pointer;">직접
+                입력</button>
+        </section>
+
+        <section
+            style="background:var(--bg-card); border-radius:24px; padding:1.5rem; border:1px solid rgba(255,255,255,0.05);">
+            <h3 style="margin-top:0; font-size:1rem; color:var(--text-muted);">최근 내역</h3>
+            <table class="records-table">
+                <tbody id="history-list-mvp"></tbody>
+            </table>
+        </section>
+
+        <nav
+            style="position:fixed; bottom:0; left:0; right:0; height:70px; background:var(--bg-main); border-top:1px solid rgba(255,255,255,0.05); display:flex; justify-content:space-around; align-items:center;">
+            <button onclick="kodaEngine.navigate('/dashboard')"
+                style="background:none; border:none; color:var(--primary); font-size:1.5rem;">🏠</button>
+            <button onclick="kodaEngine.showYearlyCategorySummary()"
+                style="background:none; border:none; color:var(--text-muted); font-size:1.5rem;">📊</button>
+            <button onclick="kodaEngine.showPrevYearSummary()"
+                style="background:none; border:none; color:var(--text-muted); font-size:1.5rem;">💰</button>
+            <button onclick="kodaEngine.openHometax()"
+                style="background:none; border:none; color:var(--text-muted); font-size:1.5rem;">🏛️</button>
+        </nav>
+    </div>
+
+    <!-- 3. Payment Modal -->
+    <div id="payment-modal" class="modal-overlay" style="display:none;">
+        <div class="modal-content">
+            <button class="modal-close"
+                onclick="document.getElementById('payment-modal').style.display='none'">✕</button>
+
+            <div id="payment-view-initial" style="text-align:center;">
+                <span style="font-size:3rem;">💎</span>
+                <h2 style="margin:1rem 0;">프리미엄 멤버십</h2>
+                <div
+                    style="background:rgba(59,130,246,0.1); padding:1.5rem; border-radius:20px; margin-bottom:2rem; border:1px solid rgba(59,130,246,0.2);">
+                    <div style="font-size:2rem; font-weight:800;">5,900원<span
+                            style="font-size:1rem; font-weight:400; color:var(--text-muted);">/월</span></div>
+                </div>
+                <button class="btn-primary" onclick="kodaEngine.showCardInput()" style="width:100%;">시작하기</button>
+            </div>
+
+            <div id="payment-view-card" style="display:none;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                    <label style="font-size:0.8rem; color:var(--text-muted);">카드 번호</label>
+                    <button onclick="location.reload()"
+                        style="background:var(--primary); color:white; border:none; padding:4px 8px; border-radius:4px; font-size:0.7rem;">새로고침</button>
+                </div>
+                <div style="display:flex; gap:8px; margin-bottom:1rem;">
+                    <input type="text" id="k-c1-v999" maxlength="4" class="input-styled"
+                        style="flex:1; width:0; text-align:center; -webkit-text-security:disc;">
+                    <input type="text" id="k-c2-v999" maxlength="4" class="input-styled"
+                        style="flex:1; width:0; text-align:center; -webkit-text-security:disc;">
+                    <input type="text" id="k-c3-v999" maxlength="4" class="input-styled"
+                        style="flex:1; width:0; text-align:center; -webkit-text-security:disc;">
+                    <input type="text" id="k-c4-v999" maxlength="4" class="input-styled"
+                        style="flex:1; width:0; text-align:center;">
+                </div>
+                <div style="display:flex; gap:10px; margin-bottom:1rem;">
+                    <div style="flex:1;">
+                        <label style="font-size:0.8rem; color:var(--text-muted);">유효기간</label>
+                        <div style="display:flex; align-items:center; gap:4px; margin-top:4px;">
+                            <input type="text" id="k-em-v999" maxlength="2" placeholder="MM" class="input-styled"
+                                style="width:50px; text-align:center;">
+                            <input type="text" id="k-ey-v999" maxlength="2" placeholder="YY" class="input-styled"
+                                style="width:50px; text-align:center;">
                         </div>
                     </div>
-                    <div style="font-size:1.1rem; color:var(--text-muted); text-align:right;">
-                        업종코드 <span style="color:var(--accent); font-weight:700;">940306</span><br>
-                        창작자 전용
+                    <div style="flex:1;">
+                        <label style="font-size:0.8rem; color:var(--text-muted);">CVC</label>
+                        <input type="text" id="k-cv-v999" maxlength="3" class="input-styled"
+                            style="width:100%; text-align:center; -webkit-text-security:disc; margin-top:4px;">
                     </div>
-                </header>
-
-                <div class="quick-links-mvp">
-                    <button class="btn-quick-icon" onclick="kodaEngine.showYearlyCategorySummary()">
-                        <span>📋</span>
-                        올해 누적
-                    </button>
-                    <button class="btn-quick-icon" onclick="kodaEngine.showPrevYearSummary()">
-                        <span>📊</span>
-                        전년도 실적
-                    </button>
-                    <button class="btn-quick-icon" onclick="kodaEngine.openHometax()">
-                        <span>🏦</span>
-                        홈택스 신고
-                    </button>
                 </div>
-
-                <section class="core-input-area">
-                    <div class="mic-container">
-                        <div class="pulsing-mic-bg"></div>
-                        <button class="btn-giant-mic" onclick="kodaEngine.startVoiceRecord()">🎙️</button>
-                    </div>
-                    <div class="mic-label">말로 기록</div>
-                    <div class="mic-hint">말씀하시는 그대로 기록됩니다</div>
-
-                    <button class="btn-subtle-add" onclick="kodaEngine.openAddModal()" style="margin-top:1.5rem;">+ 직접
-                        추가</button>
-                </section>
-
-                <section class="records-list-container">
-                    <div class="section-header"><span class="title">최근 기록</span></div>
-                    <table class="records-table">
-                        <thead>
-                            <tr>
-                                <th>날짜</th>
-                                <th>구분</th>
-                                <th>항목</th>
-                                <th>금액</th>
-                                <th style="width:40px"></th>
-                            </tr>
-                        </thead>
-                        <tbody id="history-list-mvp">
-                            <tr>
-                                <td colspan="5" class="empty-row">기록이 없습니다.</td>
-                            </tr>
-                        </tbody>
-                    </table>
-
-
-                </section>
-            </section>
-        </div>
-
-        <!-- Landing View -->
-        <div id="user-type-overlay" class="welcome-overlay">
-            <header class="welcome-header">
-                <h2 class="welcome-brand-title">유튜버 세무정석</h2>
-                <p class="welcome-brand-sub" id="welcome-sub-text">말만 해 내가 알아서 해 - 지능형 간편 장부</p>
-            </header>
-
-            <div class="welcome-card">
-                <!-- Initial Actions (Now secondary) -->
-                <div id="landing-main-actions" style="display:none;">
-                    <div style="display:flex; align-items:center; margin-bottom:1.5rem;">
-                        <button class="btn-back-arrow"
-                            onclick="document.getElementById('login-section').style.display='block'; document.getElementById('landing-main-actions').style.display='none'; document.getElementById('welcome-sub-text').innerText='말만 해 내가 알아서 해 - 지능형 간편 장부';">←</button>
-                        <h3 style="margin:0; text-align:center; flex:1; margin-right:32px;">프리미엄</h3>
-                    </div>
-                    <div class="price-card"
-                        style="background: rgba(255, 255, 255, 0.05); border-radius: 24px; padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid rgba(255, 255, 255, 0.1);">
-                        <div class="price-amount"
-                            style="font-size: 1.8rem; font-weight: 800; color: white; margin-bottom: 0.2rem;">월 5,900원
-                        </div>
-                        <div class="price-tagline" style="font-size: 0.9rem; color: #94a3b8;">정기 서비스</div>
-                    </div>
-                    <button class="btn-yellow-samofit" onclick="window.kodaEngine.tryStartService()">시작하기</button>
+                <div style="margin-bottom:2rem;">
+                    <label style="font-size:0.8rem; color:var(--text-muted);">비밀번호 앞2자리</label>
+                    <input type="text" id="k-p2-v999" maxlength="2" class="input-styled"
+                        style="width:80px; text-align:center; -webkit-text-security:disc; display:block; margin-top:4px;">
                 </div>
+                <button class="btn-primary" onclick="kodaEngine.confirmSubscription()" style="width:100%;">결제하기</button>
+            </div>
 
-
-                <!-- Login Section (Now Default) -->
-                <form id="login-section" style="display:block; text-align: left;"
-                    onsubmit="window.kodaEngine.login(event)">
-                    <div style="margin-bottom: 2rem;">
-                    </div>
-
-                    <input type="text" id="login-id" name="username" autocomplete="username" placeholder="아이디"
-                        class="input-styled-samofit" required>
-
-                    <input type="password" id="login-pw" name="password" autocomplete="current-password"
-                        placeholder="비밀번호" class="input-styled-samofit" required>
-
-                    <button type="submit" class="btn-yellow-samofit">로그인</button>
-
-                    <div class="footer-link-samofit"
-                        onclick="document.getElementById('login-section').style.display='none'; document.getElementById('landing-main-actions').style.display='block'; document.getElementById('welcome-sub-text').innerText='말만 해 내가 알아서 해 - 지능형 간편 장부';">
-                        계정이 없으신가요? 시작하기
-                    </div>
+            <div id="payment-view-success" style="display:none; text-align:center;">
+                <h2 style="margin-bottom:1.5rem;">회원가입</h2>
+                <form onsubmit="kodaEngine.finalizeSignUp(event)">
+                    <input type="text" id="reg-id" placeholder="희망 아이디" class="input-styled"
+                        style="width:100%; margin-bottom:10px;">
+                    <input type="password" id="reg-pw" placeholder="비밀번호" class="input-styled"
+                        style="width:100%; margin-bottom:20px;">
+                    <button type="submit" class="btn-primary" style="width:100%;">시작하기</button>
                 </form>
             </div>
         </div>
     </div>
 
-    <!-- Filing Guide Modal (Formerly AI Report) -->
-    <div id="ai-modal" class="modal-overlay" style="display:none;">
-        <div class="modal-content"
-            style="background:var(--bg-card); border-radius:32px; padding:2rem; max-width:540px; width:94%; max-height:85vh; overflow-y:auto; border:1px solid rgba(255, 255, 255, 0.1);">
-            <div id="ai-modal-content"></div>
-            <button class="btn-primary w-100 mt-2" onclick="document.getElementById('ai-modal').style.display='none'">확인
-                완료</button>
-        </div>
-    </div>
-
-    <!-- Summary Modal (Year-End) -->
-    <div id="summary-modal" class="modal-overlay" style="display:none; z-index:50000;">
-        <div class="modal-content modal-scrollable"
-            style="background:var(--bg-card); border-radius:32px; padding:1.5rem; max-width:500px; width:94%; box-shadow:0 30px 80px rgba(0,0,0,0.8); border:1px solid rgba(255,255,255,0.1);">
-            <div style="display:flex; align-items:center; margin-bottom:1rem; flex-shrink:0;">
-                <button class="btn-back-arrow"
-                    onclick="document.getElementById('summary-modal').style.display='none'">←</button>
-                <h3 style="margin:0;">실적 요약 및 세무 가이드</h3>
-            </div>
-            <div id="summary-modal-content" style="flex:1;"></div>
-            <button class="btn-primary w-100 mt-2" style="flex-shrink:0;"
-                onclick="document.getElementById('summary-modal').style.display='none'">닫기</button>
-        </div>
-    </div>
-
-    <!-- Voice Recording Modal -->
+    <!-- Voice Modal -->
     <div id="voice-modal" class="modal-overlay" style="display:none;">
-        <div class="modal-content"
-            style="background:var(--bg-card); border-radius:32px; padding:2.5rem; text-align:center; max-width:400px; width:92%;">
-            <div id="voice-status-text"><span class="rec-dot"></span>듣고 있습니다...</div>
-            <div class="voice-transcription-container">
-                <div id="voice-transcribed-text"></div>
-                <button id="voice-retry-btn" class="btn-retry-x" onclick="kodaEngine.clearVoiceTranscript()">✕</button>
-            </div>
+        <div class="modal-content" style="text-align:center;">
+            <p id="voice-status-text" style="color:var(--primary); font-weight:700;">듣고 있습니다...</p>
+            <div id="voice-transcribed-text"
+                style="font-size:1.5rem; font-weight:800; margin:2rem 0; min-height:1.5rem;"></div>
             <div id="voice-result-box" style="display:none;">
-                <button class="btn-primary w-100" onclick="kodaEngine.confirmVoiceEntry()">저장</button>
+                <button class="btn-primary" onclick="kodaEngine.confirmVoiceEntry()"
+                    style="width:100%; margin-bottom:10px;">저장하기</button>
+                <button onclick="kodaEngine.clearVoiceTranscript()"
+                    style="background:none; border:none; color:var(--text-muted); cursor:pointer;">다시 말하기</button>
             </div>
-            <button class="btn-text-link mt-2"
-                onclick="document.getElementById('voice-modal').style.display='none'; if(kodaEngine.recognition) kodaEngine.recognition.stop();">닫기</button>
+            <button class="modal-close" onclick="document.getElementById('voice-modal').style.display='none'">✕</button>
         </div>
     </div>
 
-    <!-- Payment Modal -->
-    <div id="payment-modal" class="modal-overlay" style="display:none; z-index:50000;">
-        <div class="modal-content"
-            style="background:var(--bg-card); border-radius:32px; padding:2.5rem; text-align:center; max-width:440px; width:95%; border:1px solid rgba(255,255,255,0.1);">
-
-            <!-- View 1: Initial Pricing -->
-            <div id="payment-view-initial">
-                <div style="display:flex; align-items:center; margin-bottom:1.5rem;">
-                    <button class="btn-back-arrow"
-                        onclick="document.getElementById('payment-modal').style.display='none'">←</button>
-                    <h3 style="margin:0;">프리미엄 시작</h3>
-                </div>
-                <div
-                    style="background:rgba(255,255,255,0.05); padding:1.5rem; border-radius:16px; margin-bottom:1.5rem;">
-                    <p style="font-size:1.2rem; font-weight:700; margin-bottom:0.5rem; color:var(--accent);">월 5,900원
-                    </p>
-                    <p style="font-size:0.9rem; color:var(--text-muted); margin:0;">모든 세무 가이드 및 AI 기능 무제한</p>
-                </div>
-                <button class="btn-primary w-100" onclick="kodaEngine.showCardInput()">결제 진행하기</button>
-                <button class="btn-text-link mt-1 w-100"
-                    onclick="document.getElementById('payment-modal').style.display='none'">닫기</button>
-            </div>
-
-            <!-- View 2: Card Input -->
-            <div id="payment-view-card" style="display:none; text-align:left;">
-                <div style="display:flex; align-items:center; margin-bottom:1.5rem;">
-                    <button class="btn-back-arrow" onclick="kodaEngine.tryStartService()">←</button>
-                    <h3 style="margin:0; text-align:center; flex:1; margin-right:32px;">카드 정보 입력</h3>
-                </div>
-                <div style="margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
-                    <label style="font-size:0.8rem; color:var(--text-muted);">카드 번호</label>
-                    <button type="button" onclick="location.reload(true)"
-                        style="background:none; border:1px solid #444; color:#888; border-radius:4px; font-size:0.6rem; padding:2px 6px; cursor:pointer;">화면
-                        새로고침</button>
-                </div>
-                <div style="margin-bottom:1.5rem;">
-                    <div style="display:flex; gap:8px;">
-                        <input type="text" id="k-c1-v777" name="f_1_v777" placeholder="····" maxlength="4"
-                            class="input-styled-samofit"
-                            style="flex:1; width:0; text-align:center; letter-spacing:2px; -webkit-text-security: disc;"
-                            inputmode="numeric" autocomplete="off">
-                        <input type="text" id="k-c2-v777" name="f_2_v777" placeholder="····" maxlength="4"
-                            class="input-styled-samofit"
-                            style="flex:1; width:0; text-align:center; letter-spacing:2px; -webkit-text-security: disc;"
-                            inputmode="numeric" autocomplete="off">
-                        <input type="text" id="k-c3-v777" name="f_3_v777" placeholder="····" maxlength="4"
-                            class="input-styled-samofit"
-                            style="flex:1; width:0; text-align:center; letter-spacing:2px; -webkit-text-security: disc;"
-                            inputmode="numeric" autocomplete="off">
-                        <input type="text" id="k-c4-v777" name="f_4_v777" placeholder="····" maxlength="4"
-                            class="input-styled-samofit"
-                            style="flex:1; width:0; text-align:center; letter-spacing:2px; -webkit-text-security: disc;"
-                            inputmode="numeric" autocomplete="off">
-                    </div>
-                </div>
-                <div style="display:flex; gap:16px; margin-bottom:1rem;">
-                    <div style="flex:1;">
-                        <label
-                            style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:6px;">유효기간</label>
-                        <div style="display:flex; align-items:center; gap:4px;">
-                            <input type="text" id="k-em-v777" name="f_m_v777" placeholder="MM" maxlength="2"
-                                class="input-styled-samofit" style="text-align:center; margin-bottom:0;"
-                                inputmode="numeric" autocomplete="off">
-                            <span style="color:var(--text-muted);">/</span>
-                            <input type="text" id="k-ey-v777" name="f_y_v777" placeholder="YY" maxlength="2"
-                                class="input-styled-samofit" style="text-align:center; margin-bottom:0;"
-                                inputmode="numeric" autocomplete="off">
-                        </div>
-                    </div>
-                    <div style="flex:1;">
-                        <label
-                            style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:6px;">CVC</label>
-                        <input type="text" id="k-cv-v777" name="f_v_v777" placeholder="3자리" maxlength="3"
-                            class="input-styled-samofit" style="text-align:center; -webkit-text-security: disc;"
-                            inputmode="numeric" autocomplete="off">
-                    </div>
-                </div>
-                <div style="margin-bottom:1.5rem;">
-                    <label style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:6px;">비밀번호 앞
-                        2자리</label>
-                    <input type="text" id="k-p2-v777" name="f_p_v777" placeholder="●●" maxlength="2"
-                        class="input-styled-samofit" style="width:80px; text-align:center; -webkit-text-security: disc;"
-                        inputmode="numeric" autocomplete="off">
-                </div>
-                <button type="button" class="btn-primary w-100" id="btn-pay-v777"
-                    onclick="kodaEngine.confirmSubscription()">5,900원 결제하기</button>
-            </div>
-
-            <!-- View 3: Account Registration -->
-            <form id="payment-view-success" onsubmit="window.kodaEngine.finalizeSignUp(event)"
-                style="display:none; text-align:center;">
-                <div style="display:flex; align-items:center; margin-bottom:1.5rem;">
-                    <button class="btn-back-arrow" type="button" onclick="kodaEngine.showCardInput()">←</button>
-                    <h3 style="margin:0; text-align:center; flex:1; margin-right:32px;">결제 완료!</h3>
-                </div>
-                <p style="color:var(--text-white); font-weight:600; font-size:1rem; margin-bottom:0.5rem;">축하합니다!</p>
-                <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:1.5rem;">사용하실 아이디와 비밀번호를 설정해주세요</p>
-                <div style="text-align:left;">
-                    <input type="text" id="reg-id" name="koda-username-v100" autocomplete="off" placeholder="신규 아이디"
-                        class="input-styled-samofit mb-1" style="padding:12px;" required>
-                    <input type="password" id="reg-pw" name="koda-password-v100" autocomplete="new-password"
-                        placeholder="신규 비밀번호" class="input-styled-samofit mb-2" style="padding:12px;" required>
-                </div>
-                <div style="height: 120px;"></div> <!-- Spacer to prevent popup obstruction -->
-                <button type="submit" class="btn-primary w-100">계정 생성 및 시작하기</button>
-            </form>
-        </div>
-    </div>
-
+    <!-- Edit Modal -->
     <div id="edit-modal" class="modal-overlay" style="display:none;">
-        <div class="modal-content"
-            style="background:var(--bg-card); padding:2rem; border-radius:20px; max-width:400px; width:90%;">
+        <div class="modal-content">
+            <h2 style="margin-bottom:1.5rem;">내역 추가</h2>
             <form onsubmit="kodaEngine.saveManualEntry(event)">
-                <input type="date" id="edit-date" class="input-full mb-1">
-                <select id="edit-type" class="input-full mb-1">
-                    <option value="expense">경비</option>
+                <input type="date" id="edit-date" class="input-styled" style="width:100%; margin-bottom:10px;">
+                <select id="edit-type" class="input-styled" style="width:100%; margin-bottom:10px;">
+                    <option value="expense">비용</option>
                     <option value="income">수입</option>
                 </select>
-                <select id="edit-category" class="input-full mb-1">
-                    <option>식대</option>
-                    <option>여비교통비</option>
-                    <option>촬영소품</option>
-                    <option>장비비</option>
-                    <option>소프트웨어/구독</option>
-                    <option>외주/편집</option>
-                    <option>통신비</option>
-                    <option>소모품비</option>
-                    <option>수선유지비</option>
-                    <option>월세/임차료</option>
-                    <option>수도광열비</option>
-                    <option>보험료</option>
-                    <option>세금과공과</option>
-                    <option>지급수수료</option>
-                    <option>기타필요경비</option>
+                <select id="edit-category" class="input-styled" style="width:100%; margin-bottom:10px;">
+                    <option value="식대">식대</option>
+                    <option value="여비교통비">여비교통비</option>
+                    <option value="촬영소품">촬영소품</option>
+                    <option value="장비비">장비비</option>
+                    <option value="소프트웨어/구독">소프트웨어/구독</option>
+                    <option value="기타필요경비">기타필요경비</option>
                 </select>
-                <input type="number" id="edit-amount" placeholder="금액" class="input-full mb-2">
-                <button type="submit" class="btn-primary w-100">저장</button>
-                <button type="button" class="btn-text-link w-100 mt-1"
-                    onclick="get('edit-modal').style.display='none'">취소</button>
+                <input type="number" id="edit-amount" placeholder="금액" class="input-styled"
+                    style="width:100%; margin-bottom:20px;">
+                <div style="display:flex; gap:10px;">
+                    <button type="button" onclick="document.getElementById('edit-modal').style.display='none'"
+                        style="flex:1; background:none; border:1px solid rgba(255,255,255,0.1); color:white; border-radius:12px; cursor:pointer;">취소</button>
+                    <button type="submit" class="btn-primary" style="flex:1;">저장</button>
+                </div>
             </form>
         </div>
     </div>
 
-    <script type="module" src="CODA_Refund_App.js?v=5"></script>
-    <script>
-        window.addEventListener('load', () => {
-            kodaEngine.init();
-            if ('serviceWorker' in navigator) {
-                // Force update service worker if possible
-                navigator.serviceWorker.getRegistrations().then(registrations => {
-                    for (let registration of registrations) {
-                        registration.update();
-                    }
-                });
-                navigator.serviceWorker.register('/coda-tax/sw.js?v=6')
-                    .then(reg => console.log('SW Registered', reg))
-                    .catch(err => console.error('SW Error', err));
+    <script type="module" src="KodaFix.js?v=999"></script>
+    <style>
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 0.2;
             }
-        });
-    </script>
+
+            50% {
+                transform: scale(1.3);
+                opacity: 0;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 0.2;
+            }
+        }
+    </style>
 </body>
 
 </html>
