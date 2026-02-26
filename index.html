@@ -29,7 +29,7 @@
                 });
             }
             // 3. Increment internal version check
-            const CURRENT_VERSION = 'v1004';
+            const CURRENT_VERSION = 'v1005';
             if (localStorage.getItem('app_v') !== CURRENT_VERSION) {
                 localStorage.clear();
                 localStorage.setItem('app_v', CURRENT_VERSION);
@@ -137,21 +137,64 @@
 
         .btn-primary:active {
             transform: scale(0.98);
-            opacity: 0.9;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(15px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 5000;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: #111827;
+            /* Solid dark bg for modal */
+            border-radius: 32px;
+            padding: 2.5rem 2rem;
+            width: 100%;
+            max-width: 400px;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.9);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            background: rgba(255, 255, 255, 0.05);
+            border: none;
+            color: var(--text-muted);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
         }
 
         .input-styled {
-            background: rgba(0, 0, 0, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(15, 23, 42, 0.6);
+            /* Deep dark pearl */
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 12px;
             color: white;
             padding: 14px;
             box-sizing: border-box;
             font-size: 1rem;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            backface-visibility: hidden;
-            transform: translateZ(0);
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .input-styled:focus {
+            border-color: var(--primary);
         }
 
         /* Ensure certain inputs are NOT masked */
@@ -268,7 +311,7 @@
                 <span style="font-size:3rem;">💎</span>
                 <h2 style="margin:1rem 0;">프리미엄 멤버십</h2>
                 <div
-                    style="background:rgba(59,130,246,0.1); padding:1.5rem; border-radius:20px; margin-bottom:2rem; border:1px solid rgba(59,130,246,0.2);">
+                    style="background:rgba(59,130,246,0.05); padding:1.5rem; border-radius:20px; margin-bottom:2rem; border:1px solid rgba(59,130,246,0.1);">
                     <div style="font-size:2rem; font-weight:800;">5,900원<span
                             style="font-size:1rem; font-weight:400; color:var(--text-muted);">/월</span></div>
                 </div>
