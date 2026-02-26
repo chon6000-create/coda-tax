@@ -656,8 +656,8 @@ window.kodaEngine = (() => {
 
     const setupCardInputs = () => {
         const cardFields = [
-            'cn1-v99', 'cn2-v99', 'cn3-v99', 'cn4-v99',
-            'ce-m-v99', 'ce-y-v99', 'ce-v-v99', 'cp-2-v99'
+            'cn1-v100', 'cn2-v100', 'cn3-v100', 'cn4-v100',
+            'ce-m-v100', 'ce-y-v100', 'ce-v-v100', 'cp-2-v100'
         ];
 
         cardFields.forEach((id, index) => {
@@ -718,15 +718,19 @@ window.kodaEngine = (() => {
             alert("가입 및 결제가 완료되었습니다!");
             get('payment-modal').style.display = 'none';
             navigate('/dashboard');
-        } catch (e) {
-            console.error("Sign Up Error:", e);
+        } catch (err) {
+            console.error("Sign Up Error Details:", err);
             let msg = "오류가 발생했습니다.";
-            if (e.code === 'auth/email-already-in-use') {
+            if (err.code === 'auth/email-already-in-use') {
                 msg = "이미 등록된 아이디(중복)입니다. 다른 아이디를 시도해주세요.";
-            } else if (e.code === 'auth/weak-password') {
+            } else if (err.code === 'auth/weak-password') {
                 msg = "비밀번호가 너무 짧거나 취약합니다.";
-            } else if (e.code === 'auth/invalid-email') {
+            } else if (err.code === 'auth/invalid-email') {
                 msg = "ID 형식이 올바르지 않습니다.";
+            } else if (err.code) {
+                msg = `Firebase 오류: ${err.code}`;
+            } else {
+                msg = err.message || "알 수 없는 오류가 발생했습니다.";
             }
             alert("⚠️ " + msg);
         }
