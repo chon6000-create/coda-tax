@@ -568,124 +568,134 @@
                 <div style="margin-bottom:1.5rem;">
                     <label style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:8px;">카드
                         번호</label>
-                    <div style="display:flex; gap:8px;">
-                        <input type="password" id="cn1-v7" name="cn1-v7" placeholder="····" maxlength="4"
-                            class="input-styled-samofit" style="flex:1; width:0; text-align:center; letter-spacing:2px;"
-                            inputmode="numeric" autocomplete="new-password">
-                        <input type="password" id="cn2-v7" name="cn2-v7" placeholder="····" maxlength="4"
-                            class="input-styled-samofit" style="flex:1; width:0; text-align:center; letter-spacing:2px;"
-                            inputmode="numeric" autocomplete="new-password">
-                        <input type="password" id="cn3-v7" name="cn3-v7" placeholder="····" maxlength="4"
-                            class="input-styled-samofit" style="flex:1; width:0; text-align:center; letter-spacing:2px;"
-                            inputmode="numeric" autocomplete="new-password">
-                        <input type="password" id="cn4-v7" name="cn4-v7" placeholder="····" maxlength="4"
-                            class="input-styled-samofit" style="flex:1; width:0; text-align:center; letter-spacing:2px;"
-                            inputmode="numeric" autocomplete="new-password">
-                    </div>
-                </div>
-                <div style="display:flex; gap:16px; margin-bottom:1rem;">
-                    <div style="flex:1;">
-                        <label
-                            style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:6px;">유효기간</label>
-                        <div style="display:flex; align-items:center; gap:4px;">
-                            <input type="tel" id="ce-m" name="ce-m" placeholder="MM" maxlength="2"
-                                class="input-styled-samofit" style="text-align:center; margin-bottom:0;"
+                    <div style="margin-bottom:1.5rem;">
+                        <label style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:8px;">카드
+                            번호</label>
+                        <div style="display:flex; gap:8px;">
+                            <input type="text" id="cn1-v99" name="card-num-v99-1" placeholder="····" maxlength="4"
+                                class="input-styled-samofit"
+                                style="flex:1; width:0; text-align:center; letter-spacing:2px; -webkit-text-security: disc;"
                                 inputmode="numeric" autocomplete="new-password">
-                            <span style="color:var(--text-muted);">/</span>
-                            <input type="tel" id="ce-y" name="ce-y" placeholder="YY" maxlength="2"
-                                class="input-styled-samofit" style="text-align:center; margin-bottom:0;"
+                            <input type="text" id="cn2-v99" name="card-num-v99-2" placeholder="····" maxlength="4"
+                                class="input-styled-samofit"
+                                style="flex:1; width:0; text-align:center; letter-spacing:2px; -webkit-text-security: disc;"
+                                inputmode="numeric" autocomplete="new-password">
+                            <input type="text" id="cn3-v99" name="card-num-v99-3" placeholder="····" maxlength="4"
+                                class="input-styled-samofit"
+                                style="flex:1; width:0; text-align:center; letter-spacing:2px; -webkit-text-security: disc;"
+                                inputmode="numeric" autocomplete="new-password">
+                            <input type="text" id="cn4-v99" name="card-num-v99-4" placeholder="····" maxlength="4"
+                                class="input-styled-samofit"
+                                style="flex:1; width:0; text-align:center; letter-spacing:2px; -webkit-text-security: disc;"
                                 inputmode="numeric" autocomplete="new-password">
                         </div>
                     </div>
-                    <div style="flex:1;">
-                        <label
-                            style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:6px;">CVC</label>
-                        <input type="password" id="ce-v" name="ce-v" placeholder="3자리" maxlength="3"
-                            class="input-styled-samofit" style="text-align:center;" inputmode="numeric"
+                    <div style="display:flex; gap:16px; margin-bottom:1rem;">
+                        <div style="flex:1;">
+                            <label
+                                style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:6px;">유효기간</label>
+                            <div style="display:flex; align-items:center; gap:4px;">
+                                <input type="text" id="ce-m-v99" name="expiry-month-v99" placeholder="MM" maxlength="2"
+                                    class="input-styled-samofit" style="text-align:center; margin-bottom:0;"
+                                    inputmode="numeric" autocomplete="new-password">
+                                <span style="color:var(--text-muted);">/</span>
+                                <input type="text" id="ce-y-v99" name="expiry-year-v99" placeholder="YY" maxlength="2"
+                                    class="input-styled-samofit" style="text-align:center; margin-bottom:0;"
+                                    inputmode="numeric" autocomplete="new-password">
+                            </div>
+                        </div>
+                        <div style="flex:1;">
+                            <label
+                                style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:6px;">CVC</label>
+                            <input type="text" id="ce-v-v99" name="card-cvc-v99" placeholder="3자리" maxlength="3"
+                                class="input-styled-samofit" style="text-align:center; -webkit-text-security: disc;"
+                                inputmode="numeric" autocomplete="new-password">
+                        </div>
+                    </div>
+                    <div style="margin-bottom:1.5rem;">
+                        <label style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:6px;">비밀번호
+                            앞
+                            2자리</label>
+                        <input type="text" id="cp-2-v99" name="card-pw2-v99" placeholder="●●" maxlength="2"
+                            class="input-styled-samofit"
+                            style="width:80px; text-align:center; -webkit-text-security: disc;" inputmode="numeric"
                             autocomplete="new-password">
                     </div>
+                    <button class="btn-primary w-100" onclick="kodaEngine.confirmSubscription()">5,900원 결제하기</button>
                 </div>
-                <div style="margin-bottom:1.5rem;">
-                    <label style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:6px;">비밀번호 앞
-                        2자리</label>
-                    <input type="password" id="cp-2" name="cp-2" placeholder="●●" maxlength="2"
-                        class="input-styled-samofit" style="width:80px; text-align:center;" inputmode="numeric"
-                        autocomplete="new-password">
-                </div>
-                <button class="btn-primary w-100" onclick="kodaEngine.confirmSubscription()">5,900원 결제하기</button>
+
+                <!-- View 3: Account Registration -->
+                <form id="payment-view-success" onsubmit="window.kodaEngine.finalizeSignUp(event)"
+                    style="display:none; text-align:center;">
+                    <div style="display:flex; align-items:center; margin-bottom:1.5rem;">
+                        <button class="btn-back-arrow" type="button" onclick="kodaEngine.showCardInput()">←</button>
+                        <h3 style="margin:0; text-align:center; flex:1; margin-right:32px;">결제 성공!</h3>
+                    </div>
+                    <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:1.5rem;">사용하실 단독 아이디와
+                        비밀번호를<br>설정해주세요</p>
+                    </p>
+                    <div style="text-align:left;">
+                        <input type="text" id="reg-id" name="username" autocomplete="username" placeholder="신규 아이디"
+                            class="input-styled-samofit mb-1" style="padding:12px;" required>
+                        <input type="password" id="reg-pw" name="password" autocomplete="new-password"
+                            placeholder="신규 비밀번호" class="input-styled-samofit mb-2" style="padding:12px;" required>
+                    </div>
+                    <button type="submit" class="btn-primary w-100">계정 생성 및 시작하기</button>
+                </form>
             </div>
-
-            <!-- View 3: Account Registration -->
-            <form id="payment-view-success" onsubmit="window.kodaEngine.finalizeSignUp(event)"
-                style="display:none; text-align:center;">
-                <div style="display:flex; align-items:center; margin-bottom:1.5rem;">
-                    <button class="btn-back-arrow" type="button" onclick="kodaEngine.showCardInput()">←</button>
-                    <h3 style="margin:0; text-align:center; flex:1; margin-right:32px;">결제 성공!</h3>
-                </div>
-                <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:1.5rem;">사용하실 단독 아이디와 비밀번호를<br>설정해주세요
-                </p>
-                <div style="text-align:left;">
-                    <input type="text" id="reg-id" name="username" autocomplete="username" placeholder="신규 아이디"
-                        class="input-styled-samofit mb-1" style="padding:12px;" required>
-                    <input type="password" id="reg-pw" name="password" autocomplete="new-password" placeholder="신규 비밀번호"
-                        class="input-styled-samofit mb-2" style="padding:12px;" required>
-                </div>
-                <button type="submit" class="btn-primary w-100">계정 생성 및 시작하기</button>
-            </form>
         </div>
-    </div>
 
-    <div id="edit-modal" class="modal-overlay" style="display:none;">
-        <div class="modal-content"
-            style="background:var(--bg-card); padding:2rem; border-radius:20px; max-width:400px; width:90%;">
-            <form onsubmit="kodaEngine.saveManualEntry(event)">
-                <input type="date" id="edit-date" class="input-full mb-1">
-                <select id="edit-type" class="input-full mb-1">
-                    <option value="expense">경비</option>
-                    <option value="income">수입</option>
-                </select>
-                <select id="edit-category" class="input-full mb-1">
-                    <option>식대</option>
-                    <option>여비교통비</option>
-                    <option>촬영소품</option>
-                    <option>장비비</option>
-                    <option>소프트웨어/구독</option>
-                    <option>외주/편집</option>
-                    <option>통신비</option>
-                    <option>소모품비</option>
-                    <option>수선유지비</option>
-                    <option>월세/임차료</option>
-                    <option>수도광열비</option>
-                    <option>보험료</option>
-                    <option>세금과공과</option>
-                    <option>지급수수료</option>
-                    <option>기타필요경비</option>
-                </select>
-                <input type="number" id="edit-amount" placeholder="금액" class="input-full mb-2">
-                <button type="submit" class="btn-primary w-100">저장</button>
-                <button type="button" class="btn-text-link w-100 mt-1"
-                    onclick="get('edit-modal').style.display='none'">취소</button>
-            </form>
+        <div id="edit-modal" class="modal-overlay" style="display:none;">
+            <div class="modal-content"
+                style="background:var(--bg-card); padding:2rem; border-radius:20px; max-width:400px; width:90%;">
+                <form onsubmit="kodaEngine.saveManualEntry(event)">
+                    <input type="date" id="edit-date" class="input-full mb-1">
+                    <select id="edit-type" class="input-full mb-1">
+                        <option value="expense">경비</option>
+                        <option value="income">수입</option>
+                    </select>
+                    <select id="edit-category" class="input-full mb-1">
+                        <option>식대</option>
+                        <option>여비교통비</option>
+                        <option>촬영소품</option>
+                        <option>장비비</option>
+                        <option>소프트웨어/구독</option>
+                        <option>외주/편집</option>
+                        <option>통신비</option>
+                        <option>소모품비</option>
+                        <option>수선유지비</option>
+                        <option>월세/임차료</option>
+                        <option>수도광열비</option>
+                        <option>보험료</option>
+                        <option>세금과공과</option>
+                        <option>지급수수료</option>
+                        <option>기타필요경비</option>
+                    </select>
+                    <input type="number" id="edit-amount" placeholder="금액" class="input-full mb-2">
+                    <button type="submit" class="btn-primary w-100">저장</button>
+                    <button type="button" class="btn-text-link w-100 mt-1"
+                        onclick="get('edit-modal').style.display='none'">취소</button>
+                </form>
+            </div>
         </div>
-    </div>
 
-    <script type="module" src="CODA_Refund_App.js?v=5"></script>
-    <script>
-        window.addEventListener('load', () => {
-            kodaEngine.init();
-            if ('serviceWorker' in navigator) {
-                // Force update service worker if possible
-                navigator.serviceWorker.getRegistrations().then(registrations => {
-                    for (let registration of registrations) {
-                        registration.update();
-                    }
-                });
-                navigator.serviceWorker.register('/coda-tax/sw.js?v=6')
-                    .then(reg => console.log('SW Registered', reg))
-                    .catch(err => console.error('SW Error', err));
-            }
-        });
-    </script>
+        <script type="module" src="CODA_Refund_App.js?v=5"></script>
+        <script>
+            window.addEventListener('load', () => {
+                kodaEngine.init();
+                if ('serviceWorker' in navigator) {
+                    // Force update service worker if possible
+                    navigator.serviceWorker.getRegistrations().then(registrations => {
+                        for (let registration of registrations) {
+                            registration.update();
+                        }
+                    });
+                    navigator.serviceWorker.register('/coda-tax/sw.js?v=6')
+                        .then(reg => console.log('SW Registered', reg))
+                        .catch(err => console.error('SW Error', err));
+                }
+            });
+        </script>
 </body>
 
 </html>

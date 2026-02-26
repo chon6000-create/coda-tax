@@ -656,18 +656,13 @@ window.kodaEngine = (() => {
 
     const setupCardInputs = () => {
         const cardFields = [
-            'cn1-v7', 'cn2-v7', 'cn3-v7', 'cn4-v7',
-            'ce-m', 'ce-y', 'ce-v', 'cp-2'
+            'cn1-v99', 'cn2-v99', 'cn3-v99', 'cn4-v99',
+            'ce-m-v99', 'ce-y-v99', 'ce-v-v99', 'cp-2-v99'
         ];
 
         cardFields.forEach((id, index) => {
             const el = get(id);
             if (!el) return;
-
-            // Block common autofill behaviors
-            el.addEventListener('focus', () => {
-                if (/\D/.test(el.value)) el.value = '';
-            });
 
             el.addEventListener('input', (e) => {
                 let val = e.target.value.replace(/\D/g, '');
