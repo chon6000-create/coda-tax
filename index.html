@@ -29,7 +29,7 @@
                 });
             }
             // 3. Increment internal version check
-            const CURRENT_VERSION = 'v1009';
+            const CURRENT_VERSION = 'v1010';
             if (localStorage.getItem('app_v') !== CURRENT_VERSION) {
                 localStorage.clear();
                 localStorage.setItem('app_v', CURRENT_VERSION);
@@ -393,13 +393,29 @@
 
             <div id="payment-view-success" style="display:none; text-align:center;">
                 <h2 style="margin-bottom:1.5rem;">회원가입</h2>
-                <form onsubmit="kodaEngine.finalizeSignUp(event)">
-                    <input type="text" id="reg-id" placeholder="희망 아이디" class="input-styled"
-                        style="width:100%; margin-bottom:10px;">
-                    <input type="password" id="reg-pw" placeholder="비밀번호" class="input-styled"
-                        style="width:100%; margin-bottom:20px;">
-                    <button type="submit" class="btn-primary" style="width:100%;">시작하기</button>
+                <form id="sign-up-form" onsubmit="kodaEngine.finalizeSignUp(event)">
+                    <div style="margin-bottom:12px;">
+                        <label>아이디 (또는 이메일)</label>
+                        <input type="text" id="reg-id" placeholder="희망 아이디" class="input-styled">
+                    </div>
+                    <div style="margin-bottom:20px;">
+                        <label>비밀번호</label>
+                        <input type="password" id="reg-pw" placeholder="비밀번호" class="input-styled">
+                    </div>
+                    <button type="submit" id="reg-submit-btn" class="btn-primary" style="width:100%;">시작하기</button>
                 </form>
+            </div>
+
+            <!-- New Dedicated Success View -->
+            <div id="payment-view-final-success" style="display:none; text-align:center; padding: 1rem 0;">
+                <div style="font-size:4rem; margin-bottom:1.5rem; animation: bounce 1s infinite alternate;">🎉</div>
+                <h2 style="margin-bottom:1rem; color: var(--success);">결제 및 가입 성공!</h2>
+                <p style="color: var(--text-muted); margin-bottom:2rem; line-height:1.6;">
+                    축하합니다! 이제 세무정석의<br>모든 기능을 자유롭게 이용하실 수 있습니다.
+                </p>
+                <button class="btn-primary"
+                    onclick="kodaEngine.navigate('/dashboard'); document.getElementById('payment-modal').style.display='none';"
+                    style="width:100%;">지금 바로 시작하기</button>
             </div>
         </div>
     </div>
@@ -451,20 +467,13 @@
 
     <script type="module" src="SeomuFix.js?v=1002"></script>
     <style>
-        @keyframes pulse {
-            0% {
-                transform: scale(1);
-                opacity: 0.2;
+        @keyframes bounce {
+            from {
+                transform: translateY(0);
             }
 
-            50% {
-                transform: scale(1.3);
-                opacity: 0;
-            }
-
-            100% {
-                transform: scale(1);
-                opacity: 0.2;
+            to {
+                transform: translateY(-15px);
             }
         }
     </style>

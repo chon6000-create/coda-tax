@@ -214,27 +214,50 @@ window.kodaEngine = (() => {
         if (e) e.preventDefault();
         const id = get('reg-id').value.trim();
         const pw = get('reg-pw').value.trim();
-        if (!id || !pw) { alert("아이디/비번을 입력해주세요."); return; }
+        const submitBtn = get('reg-submit-btn');
 
-        // Log to help debug if it fails again
-        console.log("Starting Firebase check...", auth.app.options.projectId);
+        if (!id || !pw) {
+            alert("아이디와 비밀번호를 모두 입력해주세요.");
+            return;
+        }
+
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerText = "결제 및 가입 처리 중...";
+            submitBtn.style.opacity = "0.7";
+        }
 
         try {
-            // Ensure email format is strictly valid to avoid internal provider mismatches
             const email = id.includes('@') ? id : `${id}@coda-tax.com`;
             const userCredential = await createUserWithEmailAndPassword(auth, email, pw);
-            console.log("Success:", userCredential.user.uid);
 
-            alert("환영합니다! 가입이 완료되었습니다.");
-            get('payment-modal').style.display = 'none';
-            navigate('/dashboard');
+            // On Success: Show the Dedicated Success Screen
+            get('payment-view-success').style.display = 'none';
+            get('payment-view-final-success').style.display = 'block';
+
+            localStorage.setItem('yt_user_status', 'paid');
         } catch (err) {
-            console.error("Auth Error Detail:", err.code, err.message);
-            if (err.code === 'auth/configuration-not-found') {
-                alert("Firebase 인증 설정 오류입니다. 관리자에게 문의해주세요. (Email/Password provider missing)");
-            } else {
-                alert("가입 오류: " + err.message);
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerText = "시작하기";
+                submitBtn.style.opacity = "1";
             }
+
+            console.error("Auth Error Detail:", err.code, err.message);
+
+            let userMsg = "가입 오류가 발생했습니다. ";
+            if (err.code === 'auth/configuration-not-found') {
+                userMsg = "Firebase 설정 오류: 'Email/Password' 인증이 활성화되어 있지 않습니다. Firebase Console에서 설정을 확인해 주세요.";
+            } else if (err.code === 'auth/email-already-in-use') {
+                userMsg = "이미 존재하는 아이디입니다.";
+            } else if (err.code === 'auth/weak-password') {
+                userMsg = "비밀번호는 6자리 이상이어야 합니다.";
+            } else if (err.code === 'auth/invalid-email') {
+                userMsg = "아이디 형식이 올바르지 않습니다.";
+            } else {
+                userMsg += `(${err.code})`;
+            }
+            alert("⚠️ " + userMsg);
         }
     };
 
