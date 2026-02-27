@@ -247,9 +247,7 @@ window.kodaEngine = (() => {
 
             let userMsg = "가입 오류가 발생했습니다. ";
             if (err.code === 'auth/configuration-not-found') {
-                // Show Friendly Setup Modal instead of cryptic alert
-                get('firebase-setup-modal').style.display = 'flex';
-                return; // Stop here, modal will guide the user
+                userMsg = "Firebase 설정 오류: 'Email/Password' 인증을 활성화해 주세요. (관리자님, 딱 한번만 콘솔에서 설정을 켜주시면 됩니다!)";
             } else if (err.code === 'auth/email-already-in-use') {
                 userMsg = "이미 존재하는 아이디입니다.";
             } else if (err.code === 'auth/weak-password') {
