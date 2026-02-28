@@ -121,14 +121,14 @@ window.kodaEngine = (() => {
     };
 
     const init = async () => {
-        console.log("세무정석 엔진 시작 (v1026)");
+        console.log("세무정석 엔진 시작 (v1027)");
         onAuthStateChanged(auth, (user) => {
             console.log("onAuthStateChanged:", user ? user.email : 'no user');
             state.currentUser = user;
             state.isAuthInitialized = true; // Mark as initialized
 
             if (user) {
-                localStorage.setItem('yt_user_status', 'paid');
+                // localStorage yt_user_status removed in v1027 to prevent auto-redirect race
                 const q = query(collection(db, "users", user.uid, "records"), orderBy("date", "desc"));
                 onSnapshot(q, (snap) => {
                     console.log("Firestore Snapshot received, count:", snap.docs.length);
@@ -279,35 +279,15 @@ window.kodaEngine = (() => {
             if (statusIndicator) statusIndicator.style.display = 'none';
         }
 
-        // --- Calculate Dashboard Summaries (This Month) ---
-        let incomeTotal = 0;
-        let expenseTotal = 0;
-        const now = new Date();
-        const curMonth = (now.getMonth() + 1).toString().padStart(2, '0');
-        const curYear = now.getFullYear().toString();
+        // --- Monthly Summaries calculation removed in v1027 as requested ---
 
-        state.records.forEach(r => {
-            if (r.date && r.date.startsWith(`${curYear}-${curMonth}`)) {
-                if (r.type === 'income') incomeTotal += (Number(r.amount) || 0);
-                else expenseTotal += (Number(r.amount) || 0);
-            }
-        });
-
-        const incomeEl = get('monthly-income-total');
-        const expenseEl = get('monthly-expense-total');
-        const profitEl = get('monthly-profit-total');
-
-        if (incomeEl) incomeEl.innerText = formatCurrency(incomeTotal) + '원';
-        if (expenseEl) expenseEl.innerText = formatCurrency(expenseTotal) + '원';
-        if (profitEl) profitEl.innerText = formatCurrency(incomeTotal - expenseTotal) + '원';
-
-        const list = get('history-list-mvp');
-        if (!list) return;
+        const historyList = get('history-list-mvp');
+        if (!historyList) return;
         const filtered = state.records.slice(0, 10);
         if (filtered.length === 0) {
-            list.innerHTML = '<tr><td colspan="5" class="empty-row">기록이 없습니다.</td></tr>';
+            historyList.innerHTML = '<tr><td colspan="5" class="empty-row">기록이 없습니다.</td></tr>';
         } else {
-            list.innerHTML = filtered.map(r => `
+            historyList.innerHTML = filtered.map(r => `
                 <tr>
                     <td class="cell-date">${r.date.slice(5).replace('-', '/')}</td>
                     <td class="cell-type ${r.type}">${r.type === 'income' ? '수입' : '경비'}</td>
@@ -655,7 +635,7 @@ window.kodaEngine = (() => {
                     </div>
                 </div>
              `;
-            get('report-title').innerText = "종합 세무 분석 리포트";
+            get('report-title').innerText = "전년도 세무 분석 리포트";
             get('report-content').innerHTML = html;
             get('report-modal').style.display = 'flex';
         },
