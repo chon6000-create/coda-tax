@@ -559,10 +559,11 @@ window.kodaEngine = (() => {
                 saveBtn.innerText = "저장 중...";
             }
             try {
+                alert("디버그: Firestore 저장 시도 시작 (UID: " + state.currentUser.uid.slice(0, 5) + ")");
                 console.log("Firestore Save Start:", state.lastDetected);
                 const docRef = await addDoc(collection(db, "users", state.currentUser.uid, "records"), state.lastDetected);
                 console.log("Firestore Save Success - ID:", docRef.id);
-                alert("기록 저장 완료! ✅");
+                alert("기록 저장 완료! ✅ (ID: " + docRef.id.slice(0, 5) + ")");
                 showToast("내역이 저장되었습니다! 🎉");
                 get('voice-modal').style.display = 'none';
                 state.lastDetected = null;
@@ -570,10 +571,9 @@ window.kodaEngine = (() => {
                     saveBtn.disabled = false;
                     saveBtn.innerText = "저장하기";
                 }
-                // render() is called automatically by onSnapshot
             } catch (e) {
                 console.error("Firestore Save Error:", e);
-                alert("저장 실패 오류: " + e.message + "\n(데이터베이스 권한 또는 연결 상태를 확인해주세요)");
+                alert("저장 실패 오류 발생!\n메시지: " + e.message + "\n코드: " + (e.code || "unknown"));
                 showToast("저장 실패: 권한 또는 연결 오류", "error");
                 if (saveBtn) {
                     saveBtn.disabled = false;
