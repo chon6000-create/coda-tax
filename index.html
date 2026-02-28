@@ -1,390 +1,374 @@
-<!DOCTYPE html>
-<html lang="ko">
+// NUCLEAR CACHE BUSTING - v1020 - FINAL FORCE
+(function () {
+const VERSION = 'v1020';
+if (localStorage.getItem('app_v') !== VERSION) {
+console.log("Nuclear Reset to " + VERSION);
+localStorage.clear();
+localStorage.setItem('app_v', VERSION);
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- MASTER CACHE BREAK -->
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
+// FORCE SERVICE WORKER CLEAR
+if ('serviceWorker' in navigator) {
+navigator.serviceWorker.getRegistrations().then(function(registrations) {
+for(let registration of registrations) {
+registration.unregister();
+}
+});
+}
+location.reload(true);
+}
+})();
+</script>
 
-    <script>
-        // NUCLEAR CACHE BUSTING - v1019 - CODA - Build: 2026-03-01 05:48
-        (function () {
-            const VERSION = 'v1019';
-            if (localStorage.getItem('app_v') !== VERSION) {
-                console.log("Nuclear Reset to " + VERSION);
-                localStorage.clear();
-                localStorage.setItem('app_v', VERSION);
+<title>세무정석 - v1020</title>
+<link rel="stylesheet" as="style" crossorigin
+    href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+<!-- Portone (Iamport) SDK -->
+<script src="https://cdn.iamport.kr/v1/iamport.js"></script>
+<style>
+    /* Consolidating styles for premium look */
+    :root {
+        --primary: #3B82F6;
+        --primary-hover: #2563EB;
+        --background: #0f172a;
+        --card-bg: rgba(15, 23, 42, 0.7);
+        --text-primary: #F8FAFC;
+        --text-muted: #94A3B8;
+        --border-color: rgba(255, 255, 255, 0.08);
+        --success: #10B981;
+        --danger: #EF4444;
+    }
 
-                // UNREGISTER ALL SERVICE WORKERS
-                if ('serviceWorker' in navigator) {
-                    navigator.serviceWorker.getRegistrations().then(function (regs) {
-                        for (let reg of regs) {
-                            reg.unregister().then(() => {
-                                console.log("SW Unregistered");
-                                location.reload(true);
-                            });
-                        }
-                    });
-                } else {
-                    location.reload(true);
-                }
-            }
-        })();
-    </script>
+    body {
+        background-color: var(--background) !important;
+        color: var(--text-primary);
+        font-family: 'Pretendard', sans-serif;
+        margin: 0;
+        -webkit-font-smoothing: antialiased;
+        overflow-x: hidden;
+        min-height: 100vh;
+    }
 
-    <title>세무정석 - 유튜버 장부 관리</title>
-    <link rel="stylesheet" as="style" crossorigin
-        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
-    <!-- Portone (Iamport) SDK -->
-    <script src="https://cdn.iamport.kr/v1/iamport.js"></script>
-    <style>
-        /* Consolidating styles for premium look */
-        :root {
-            --primary: #3B82F6;
-            --primary-hover: #2563EB;
-            --background: #0f172a;
-            --card-bg: rgba(15, 23, 42, 0.7);
-            --text-primary: #F8FAFC;
-            --text-muted: #94A3B8;
-            --border-color: rgba(255, 255, 255, 0.08);
-            --success: #10B981;
-            --danger: #EF4444;
+    /* VIBRANT BUT DEEP BACKGROUND BLOBS */
+    .bg-decor {
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        overflow: hidden;
+        pointer-events: none;
+    }
+
+    .blob {
+        position: absolute;
+        width: 45vw;
+        height: 45vw;
+        border-radius: 50%;
+        filter: blur(100px);
+        opacity: 0.25;
+        animation: move-blob 25s infinite alternate;
+    }
+
+    .blob-1 {
+        background: #1e3a8a;
+        top: -10%;
+        right: -10%;
+    }
+
+    .blob-2 {
+        background: #1e40af;
+        bottom: -10%;
+        left: -10%;
+        animation-delay: -5s;
+    }
+
+    .blob-3 {
+        background: #0369a1;
+        top: 40%;
+        left: 40%;
+        width: 30vw;
+        height: 30vw;
+        animation-delay: -10s;
+    }
+
+    @keyframes move-blob {
+        from {
+            transform: translate(0, 0) scale(1);
         }
 
-        body {
-            background-color: var(--background) !important;
-            color: var(--text-primary);
-            font-family: 'Pretendard', sans-serif;
-            margin: 0;
-            -webkit-font-smoothing: antialiased;
-            overflow-x: hidden;
-            min-height: 100vh;
+        to {
+            transform: translate(10%, 10%) scale(1.15);
         }
+    }
 
-        /* VIBRANT BUT DEEP BACKGROUND BLOBS */
-        .bg-decor {
-            position: fixed;
-            inset: 0;
-            z-index: -1;
-            overflow: hidden;
-            pointer-events: none;
-        }
+    /* PREMIUM NAVY GLASS CARD - CLEAN & CRISP */
+    .welcome-card {
+        background: var(--card-bg);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--border-color);
+        border-radius: 32px;
+        padding: 3rem 2.5rem;
+        width: 90%;
+        max-width: 420px;
+        text-align: center;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+    }
 
-        .blob {
-            position: absolute;
-            width: 45vw;
-            height: 45vw;
-            border-radius: 50%;
-            filter: blur(100px);
-            opacity: 0.25;
-            animation: move-blob 25s infinite alternate;
-        }
+    /* PROFESSIONAL PRIMARY BUTTON - NO HALO */
+    .btn-primary {
+        background: var(--primary);
+        color: white;
+        border: none;
+        padding: 1.1rem;
+        border-radius: 16px;
+        font-weight: 700;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+        display: inline-block;
+        text-decoration: none;
+        width: 100%;
+    }
 
-        .blob-1 {
-            background: #1e3a8a;
-            top: -10%;
-            right: -10%;
-        }
+    .btn-primary:hover {
+        background: var(--primary-hover);
+        transform: translateY(-2px);
+        box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.5);
+    }
 
-        .blob-2 {
-            background: #1e40af;
-            bottom: -10%;
-            left: -10%;
-            animation-delay: -5s;
-        }
+    .btn-primary:active {
+        transform: translateY(0);
+    }
 
-        .blob-3 {
-            background: #0369a1;
-            top: 40%;
-            left: 40%;
-            width: 30vw;
-            height: 30vw;
-            animation-delay: -10s;
-        }
+    .welcome-overlay {
+        position: fixed;
+        inset: 0;
+        background: #0f172a;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        transition: opacity 0.3s;
+    }
 
-        @keyframes move-blob {
-            from {
-                transform: translate(0, 0) scale(1);
-            }
+    .welcome-overlay[style*="display: none"] {
+        pointer-events: none !important;
+        visibility: hidden;
+    }
 
-            to {
-                transform: translate(10%, 10%) scale(1.15);
-            }
-        }
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.85);
+        backdrop-filter: blur(15px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 5000;
+        padding: 20px;
+    }
 
-        /* PREMIUM NAVY GLASS CARD - CLEAN & CRISP */
-        .welcome-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--border-color);
-            border-radius: 32px;
-            padding: 3rem 2.5rem;
-            width: 90%;
-            max-width: 420px;
-            text-align: center;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
-        }
+    .modal-content {
+        background: rgba(15, 23, 42, 0.95);
+        backdrop-filter: blur(25px);
+        border-radius: 32px;
+        padding: 2.5rem 2rem;
+        width: 100%;
+        max-width: 400px;
+        position: relative;
+        border: 1px solid var(--border-color);
+        box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.8);
+    }
 
-        /* PROFESSIONAL PRIMARY BUTTON - NO HALO */
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 1.1rem;
-            border-radius: 16px;
-            font-weight: 700;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
-            display: inline-block;
-            text-decoration: none;
-            width: 100%;
-        }
+    .modal-close {
+        position: absolute;
+        top: 24px;
+        right: 24px;
+        background: rgba(255, 255, 255, 0.05);
+        border: none;
+        color: var(--text-muted);
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 10;
+    }
 
-        .btn-primary:hover {
-            background: var(--primary-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.5);
-        }
+    .input-styled {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--border-color);
+        border-radius: 14px;
+        color: var(--text-primary);
+        padding: 16px;
+        box-sizing: border-box;
+        font-size: 1rem;
+        outline: none;
+        transition: all 0.2s;
+        width: 100%;
+    }
 
-        .btn-primary:active {
-            transform: translateY(0);
-        }
+    .input-styled:focus {
+        border-color: var(--primary);
+        background: rgba(255, 255, 255, 0.07);
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+    }
 
-        .welcome-overlay {
-            position: fixed;
-            inset: 0;
-            background: #0f172a;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            transition: opacity 0.3s;
-        }
+    label {
+        display: block;
+        color: var(--text-muted) !important;
+        font-size: 0.95rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+        text-align: left;
+        letter-spacing: -0.01em;
+    }
 
-        .welcome-overlay[style*="display: none"] {
-            pointer-events: none !important;
-            visibility: hidden;
-        }
+    .btn-google {
+        width: 100%;
+        padding: 1rem;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: white;
+        color: #333;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        transition: all 0.2s;
+        margin-top: 10px;
+    }
 
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(15px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 5000;
-            padding: 20px;
-        }
+    .btn-google:hover {
+        background: #f1f1f1;
+        transform: translateY(-2px);
+    }
 
-        .modal-content {
-            background: rgba(15, 23, 42, 0.95);
-            backdrop-filter: blur(25px);
-            border-radius: 32px;
-            padding: 2.5rem 2rem;
-            width: 100%;
-            max-width: 400px;
-            position: relative;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.8);
-        }
+    .btn-google img {
+        width: 20px;
+        height: 20px;
+    }
 
-        .modal-close {
-            position: absolute;
-            top: 24px;
-            right: 24px;
-            background: rgba(255, 255, 255, 0.05);
-            border: none;
-            color: var(--text-muted);
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            z-index: 10;
-        }
+    .divider {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 0.8rem;
+        margin: 1.5rem 0;
+    }
 
-        .input-styled {
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid var(--border-color);
-            border-radius: 14px;
-            color: var(--text-primary);
-            padding: 16px;
-            box-sizing: border-box;
-            font-size: 1rem;
-            outline: none;
-            transition: all 0.2s;
-            width: 100%;
-        }
+    .divider::before,
+    .divider::after {
+        content: '';
+        flex: 1;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
 
-        .input-styled:focus {
-            border-color: var(--primary);
-            background: rgba(255, 255, 255, 0.07);
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
-        }
+    .divider:not(:empty)::before {
+        margin-right: .5em;
+    }
 
-        label {
-            display: block;
-            color: var(--text-muted) !important;
-            font-size: 0.95rem;
-            font-weight: 700;
-            margin-bottom: 8px;
-            text-align: left;
-            letter-spacing: -0.01em;
-        }
+    .divider:not(:empty)::after {
+        margin-left: .5em;
+    }
 
-        .btn-google {
-            width: 100%;
-            padding: 1rem;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            background: white;
-            color: #333;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            transition: all 0.2s;
-            margin-top: 10px;
-        }
-
-        .btn-google:hover {
-            background: #f1f1f1;
-            transform: translateY(-2px);
-        }
-
-        .btn-google img {
-            width: 20px;
-            height: 20px;
-        }
-
-        .divider {
-            display: flex;
-            align-items: center;
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 0.8rem;
-            margin: 1.5rem 0;
-        }
-
-        .divider::before,
-        .divider::after {
-            content: '';
-            flex: 1;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .divider:not(:empty)::before {
-            margin-right: .5em;
-        }
-
-        .divider:not(:empty)::after {
-            margin-left: .5em;
-        }
-
-        /* Ensure certain inputs are NOT masked */
-        input.not-masked {
-            -webkit-text-security: none !important;
-        }
+    /* Ensure certain inputs are NOT masked */
+    input.not-masked {
+        -webkit-text-security: none !important;
+    }
 
 
 
-        /* KakaoPay Brand Button */
-        .btn-kakaopay {
-            background: #FEE500;
-            color: #191919;
-            border: none;
-            padding: 1.1rem;
-            border-radius: 16px;
-            font-weight: 700;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            width: 100%;
-            margin-bottom: 12px;
-            text-decoration: none;
-        }
+    /* KakaoPay Brand Button */
+    .btn-kakaopay {
+        background: #FEE500;
+        color: #191919;
+        border: none;
+        padding: 1.1rem;
+        border-radius: 16px;
+        font-weight: 700;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        margin-bottom: 12px;
+        text-decoration: none;
+    }
 
-        .btn-kakaopay:hover {
-            background: #FADA00;
-            transform: translateY(-2px);
-        }
+    .btn-kakaopay:hover {
+        background: #FADA00;
+        transform: translateY(-2px);
+    }
 
-        .btn-kakaopay img {
-            height: 20px;
-        }
+    .btn-kakaopay img {
+        height: 20px;
+    }
 
-        .divider {
-            display: flex;
-            align-items: center;
-            text-align: center;
-            margin: 1.5rem 0;
-            color: var(--text-muted);
-            font-size: 0.8rem;
-        }
+    .divider {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        margin: 1.5rem 0;
+        color: var(--text-muted);
+        font-size: 0.8rem;
+    }
 
-        .divider::before,
-        .divider::after {
-            content: '';
-            flex: 1;
-            border-bottom: 1px solid var(--border-color);
-        }
+    .divider::before,
+    .divider::after {
+        content: '';
+        flex: 1;
+        border-bottom: 1px solid var(--border-color);
+    }
 
-        .divider:not(:empty)::before {
-            margin-right: .5em;
-        }
+    .divider:not(:empty)::before {
+        margin-right: .5em;
+    }
 
-        .divider:not(:empty)::after {
-            margin-left: .5em;
-        }
+    .divider:not(:empty)::after {
+        margin-left: .5em;
+    }
 
-        /* Toast Styles */
-        #app-toast {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background: rgba(30, 41, 59, 0.9);
-            color: white;
-            padding: 12px 24px;
-            border-radius: 12px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            z-index: 9999;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            opacity: 0;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            pointer-events: none;
-        }
+    /* Toast Styles */
+    #app-toast {
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%) translateY(100px);
+        background: rgba(30, 41, 59, 0.9);
+        color: white;
+        padding: 12px 24px;
+        border-radius: 12px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        z-index: 9999;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        opacity: 0;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        pointer-events: none;
+    }
 
-        #app-toast.toast-visible {
-            transform: translateX(-50%) translateY(0);
-            opacity: 1;
-        }
+    #app-toast.toast-visible {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+    }
 
-        #app-toast.error {
-            border-color: var(--danger);
-            color: #ff9494;
-        }
-    </style>
+    #app-toast.error {
+        border-color: var(--danger);
+        color: #ff9494;
+    }
+</style>
   <script type="module" crossorigin src="/coda-tax/index.js"></script>
   <link rel="stylesheet" crossorigin href="/coda-tax/index.css">
 </head>
@@ -429,7 +413,7 @@
     <!-- 2. Main Dashboard -->
     <div id="app-container" class="app-container" style="display:none;">
         <div style="position:fixed; top:5px; right:5px; font-size:10px; color:rgba(255,255,255,0.1); z-index:10000;">
-            v1019</div>
+            v1020</div>
         <header style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3rem;">
             <h1 style="font-size:1.5rem; font-weight:900;">세무정석</h1>
             <div id="user-status-indicator" style="font-size:0.8rem; color:var(--text-muted);">
