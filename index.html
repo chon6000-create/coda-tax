@@ -10,30 +10,27 @@
     <meta http-equiv="Expires" content="0">
 
     <script>
-        // TOTAL CACHE DESTRUCTION SCRIPT
+        // NUCLEAR CACHE BUSTING - v1018 - CODA
         (function () {
-            // 1. Unregister all Service Workers
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.getRegistrations().then(function (registrations) {
-                    for (let registration of registrations) {
-                        registration.unregister();
-                        console.log("ServiceWorker unregistered");
-                    }
-                });
-            }
-            // 2. Clear all Caches
-            if ('caches' in window) {
-                caches.keys().then(function (names) {
-                    for (let name of names) caches.delete(name);
-                    console.log("Caches cleared");
-                });
-            }
-            // 3. Increment internal version check
-            const CURRENT_VERSION = 'v1012';
-            if (localStorage.getItem('app_v') !== CURRENT_VERSION) {
+            const VERSION = 'v1018';
+            if (localStorage.getItem('app_v') !== VERSION) {
+                console.log("Nuclear Reset to " + VERSION);
                 localStorage.clear();
-                localStorage.setItem('app_v', CURRENT_VERSION);
-                location.reload(true); // Force hard reload
+                localStorage.setItem('app_v', VERSION);
+
+                // UNREGISTER ALL SERVICE WORKERS
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.getRegistrations().then(function (regs) {
+                        for (let reg of regs) {
+                            reg.unregister().then(() => {
+                                console.log("SW Unregistered");
+                                location.reload(true);
+                            });
+                        }
+                    });
+                } else {
+                    location.reload(true);
+                }
             }
         })();
     </script>
@@ -41,6 +38,8 @@
     <title>세무정석 - 유튜버 장부 관리</title>
     <link rel="stylesheet" as="style" crossorigin
         href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <!-- Portone (Iamport) SDK -->
+    <script src="https://cdn.iamport.kr/v1/iamport.js"></script>
     <style>
         /* Consolidating styles for premium look */
         :root {
@@ -157,6 +156,22 @@
             transform: translateY(0);
         }
 
+        .welcome-overlay {
+            position: fixed;
+            inset: 0;
+            background: #0f172a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: opacity 0.3s;
+        }
+
+        .welcome-overlay[style*="display: none"] {
+            pointer-events: none !important;
+            visibility: hidden;
+        }
+
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -221,12 +236,62 @@
             display: block;
             color: var(--text-muted) !important;
             font-size: 0.95rem;
-            /* Slightly larger for clarity */
             font-weight: 700;
-            /* Bolder for clarity */
             margin-bottom: 8px;
             text-align: left;
             letter-spacing: -0.01em;
+        }
+
+        .btn-google {
+            width: 100%;
+            padding: 1rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: white;
+            color: #333;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn-google:hover {
+            background: #f1f1f1;
+            transform: translateY(-2px);
+        }
+
+        .btn-google img {
+            width: 20px;
+            height: 20px;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin: 1.5rem 0;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .divider:not(:empty)::before {
+            margin-right: .5em;
+        }
+
+        .divider:not(:empty)::after {
+            margin-left: .5em;
         }
 
         /* Ensure certain inputs are NOT masked */
@@ -234,20 +299,90 @@
             -webkit-text-security: none !important;
         }
 
-        /* Emergency Refresh Button */
-        #emergency-refresh {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: var(--danger);
-            color: white;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 10px;
-            z-index: 9999;
-            opacity: 0.3;
-            cursor: pointer;
+
+
+        /* KakaoPay Brand Button */
+        .btn-kakaopay {
+            background: #FEE500;
+            color: #191919;
             border: none;
+            padding: 1.1rem;
+            border-radius: 16px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            margin-bottom: 12px;
+            text-decoration: none;
+        }
+
+        .btn-kakaopay:hover {
+            background: #FADA00;
+            transform: translateY(-2px);
+        }
+
+        .btn-kakaopay img {
+            height: 20px;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 1.5rem 0;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .divider:not(:empty)::before {
+            margin-right: .5em;
+        }
+
+        .divider:not(:empty)::after {
+            margin-left: .5em;
+        }
+
+        /* Toast Styles */
+        #app-toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: rgba(30, 41, 59, 0.9);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            z-index: 9999;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            opacity: 0;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            pointer-events: none;
+        }
+
+        #app-toast.toast-visible {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        #app-toast.error {
+            border-color: var(--danger);
+            color: #ff9494;
         }
     </style>
   <script type="module" crossorigin src="/coda-tax/index.js"></script>
@@ -261,8 +396,7 @@
         <div class="blob blob-3"></div>
     </div>
 
-    <button id="emergency-refresh" onclick="localStorage.clear(); sessionStorage.clear(); location.reload(true);">강제
-        초기화</button>
+
 
     <!-- 1. Landing Screen -->
     <div id="user-type-overlay" class="welcome-overlay" style="background: transparent !important;">
@@ -278,6 +412,11 @@
                 <button type="submit" class="btn-primary" style="width:100%;">로그인</button>
             </form>
 
+            <button onclick="kodaEngine.loginWithGoogle()" class="btn-google">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+                Google로 로그인
+            </button>
+
             <p style="margin-top:2rem; font-size:0.9rem; color:var(--text-muted);">
                 계정이 없으신가요?
                 <button onclick="kodaEngine.tryStartService()"
@@ -289,6 +428,8 @@
 
     <!-- 2. Main Dashboard -->
     <div id="app-container" class="app-container" style="display:none;">
+        <div style="position:fixed; top:5px; right:5px; font-size:10px; color:rgba(255,255,255,0.1); z-index:10000;">
+            v1018</div>
         <header style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3rem;">
             <h1 style="font-size:1.5rem; font-weight:900;">세무정석</h1>
             <div id="user-status-indicator" style="font-size:0.8rem; color:var(--text-muted);">
@@ -301,7 +442,7 @@
         <section style="text-align:center; margin-bottom:4rem;">
             <div style="position:relative; display:inline-block; margin-bottom:1.5rem;">
                 <div
-                    style="position:absolute; inset:-15px; background:var(--primary); opacity:0.2; border-radius:50%; animation: pulse 2s infinite;">
+                    style="position:absolute; inset:-15px; background:var(--primary); opacity:0.2; border-radius:50%; animation: pulse 2s infinite; pointer-events: none;">
                 </div>
                 <button onclick="kodaEngine.startVoiceRecord()"
                     style="width:100px; height:100px; border-radius:50%; background:var(--primary); border:none; color:white; font-size:2.5rem; cursor:pointer; position:relative;">🎙️</button>
@@ -348,63 +489,33 @@
                     <div style="font-size:2rem; font-weight:800;">5,900원<span
                             style="font-size:1rem; font-weight:400; color:var(--text-muted);">/월</span></div>
                 </div>
-                <button class="btn-primary" onclick="kodaEngine.showCardInput()"
-                    style="width:100%; padding:1.2rem; font-size:1.2rem;">시작하기</button>
-            </div>
-
-            <div id="payment-view-card" style="display:none;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-                    <label style="font-size:0.8rem; color:var(--text-muted);">카드 번호</label>
-                    <button onclick="location.reload()"
-                        style="background:var(--primary); color:white; border:none; padding:4px 8px; border-radius:4px; font-size:0.7rem;">새로고침</button>
-                </div>
-                <div style="display:flex; gap:8px; margin-bottom:1rem;">
-                    <input type="text" id="k-c1-v999" maxlength="4" class="input-styled"
-                        style="flex:1; width:0; text-align:center; -webkit-text-security:disc;">
-                    <input type="text" id="k-c2-v999" maxlength="4" class="input-styled"
-                        style="flex:1; width:0; text-align:center; -webkit-text-security:disc;">
-                    <input type="text" id="k-c3-v999" maxlength="4" class="input-styled"
-                        style="flex:1; width:0; text-align:center; -webkit-text-security:disc;">
-                    <input type="text" id="k-c4-v999" maxlength="4" class="input-styled"
-                        style="flex:1; width:0; text-align:center;">
-                </div>
-                <div style="display:flex; gap:10px; margin-bottom:1rem;">
-                    <div style="flex:1;">
-                        <label style="font-size:0.8rem; color:var(--text-muted);">유효기간</label>
-                        <div style="display:flex; align-items:center; gap:4px; margin-top:4px;">
-                            <input type="text" id="k-em-v999" maxlength="2" placeholder="MM"
-                                class="input-styled not-masked" style="width:50px; text-align:center;">
-                            <input type="text" id="k-ey-v999" maxlength="2" placeholder="YY"
-                                class="input-styled not-masked" style="width:50px; text-align:center;">
-                        </div>
-                    </div>
-                    <div style="flex:1;">
-                        <label style="font-size:0.8rem; color:var(--text-muted);">CVC</label>
-                        <input type="text" id="k-cv-v999" maxlength="3" class="input-styled"
-                            style="width:100%; text-align:center; -webkit-text-security:disc; margin-top:4px;">
-                    </div>
-                </div>
-                <div style="margin-bottom:2rem;">
-                    <label style="font-size:0.8rem; color:var(--text-muted);">비밀번호 앞2자리</label>
-                    <input type="text" id="k-p2-v999" maxlength="2" class="input-styled"
-                        style="width:80px; text-align:center; -webkit-text-security:disc; display:block; margin-top:4px;">
-                </div>
-                <button class="btn-primary" onclick="kodaEngine.confirmSubscription()" style="width:100%;">결제하기</button>
+                <button class="btn-kakaopay" onclick="kodaEngine.requestKakaoPay()" style="margin-top: 2rem;">
+                    <img src="https://developers.kakao.com/tool/resource/static/img/button/pay/payment_icon_yellow_small.png"
+                        alt="KakaoPay">
+                    카카오페이 결제
+                </button>
             </div>
 
             <div id="payment-view-success" style="display:none; text-align:center;">
                 <h2 style="margin-bottom:1.5rem;">회원가입</h2>
-                <form id="sign-up-form" onsubmit="kodaEngine.finalizeSignUp(event)">
+                <form onsubmit="kodaEngine.finalizeSignUp(event)">
                     <div style="margin-bottom:12px;">
-                        <label>아이디 (또는 이메일)</label>
-                        <input type="text" id="reg-id" placeholder="희망 아이디" class="input-styled">
+                        <label>아이디</label>
+                        <input type="text" id="reg-id" placeholder="희망 아이디(또는 이메일)" class="input-styled">
                     </div>
                     <div style="margin-bottom:20px;">
                         <label>비밀번호</label>
                         <input type="password" id="reg-pw" placeholder="비밀번호" class="input-styled">
                     </div>
-                    <button type="submit" id="reg-submit-btn" class="btn-primary" style="width:100%;">시작하기</button>
+                    <button type="submit" id="reg-submit-btn" class="btn-primary"
+                        style="width:100%; margin-bottom: 1.5rem;">시작하기</button>
                 </form>
+
+                <div class="divider" style="margin: 1rem 0;">또는 소셜 로그인</div>
+                <button class="btn-google" onclick="kodaEngine.loginWithGoogle()">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+                    Google로 로그인
+                </button>
             </div>
 
             <!-- New Dedicated Success View -->
@@ -433,7 +544,7 @@
                 <button onclick="kodaEngine.clearVoiceTranscript()"
                     style="background:none; border:none; color:var(--text-muted); cursor:pointer;">다시 말하기</button>
             </div>
-            <button class="modal-close" onclick="document.getElementById('voice-modal').style.display='none'">✕</button>
+            <button class="modal-close" onclick="kodaEngine.cancelVoiceModal()">✕</button>
         </div>
     </div>
 
