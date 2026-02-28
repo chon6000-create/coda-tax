@@ -136,7 +136,7 @@ window.kodaEngine = (() => {
     };
 
     const init = async () => {
-        alert("세무정석 엔진 시작 (v1018)");
+        alert("세무정석 엔진 시작 (v1020 - Force)");
         onAuthStateChanged(auth, (user) => {
             console.log("onAuthStateChanged:", user ? user.email : 'no user');
             state.currentUser = user;
@@ -559,26 +559,28 @@ window.kodaEngine = (() => {
                 saveBtn.innerText = "저장 중...";
             }
             try {
-                alert("디버그: Firestore 저장 시도 시작 (UID: " + state.currentUser.uid.slice(0, 5) + ")");
-                console.log("Firestore Save Start:", state.lastDetected);
-                const docRef = await addDoc(collection(db, "users", state.currentUser.uid, "records"), state.lastDetected);
-                console.log("Firestore Save Success - ID:", docRef.id);
-                alert("기록 저장 완료! ✅ (ID: " + docRef.id.slice(0, 5) + ")");
-                showToast("내역이 저장되었습니다! 🎉");
+                alert("디버그: Firestore 저장 시도 시작 (v1020)");
+
+                // OPTIMISTIC CLOSURE: Close modal immediately to prevent "Saving..." hang UI
+                const recordToSave = { ...state.lastDetected };
                 get('voice-modal').style.display = 'none';
                 state.lastDetected = null;
                 if (saveBtn) {
                     saveBtn.disabled = false;
                     saveBtn.innerText = "저장하기";
                 }
+
+                // Add with timeout guard
+                const savePromise = addDoc(collection(db, "users", state.currentUser.uid, "records"), recordToSave);
+                const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Firestore Timeout (10s)")), 10000));
+
+                const docRef = await Promise.race([savePromise, timeoutPromise]);
+                console.log("Firestore Save Success - ID:", docRef.id);
+                showToast("내역이 저장되었습니다! 🎉");
             } catch (e) {
-                console.error("Firestore Save Error:", e);
-                alert("저장 실패 오류 발생!\n메시지: " + e.message + "\n코드: " + (e.code || "unknown"));
-                showToast("저장 실패: 권한 또는 연결 오류", "error");
-                if (saveBtn) {
-                    saveBtn.disabled = false;
-                    saveBtn.innerText = "저장하기";
-                }
+                console.error("Firestore Save Error/Timeout:", e);
+                alert("저장 상태 확인 필요: " + e.message + "\n(데이터가 이미 서버에 전송되었을 수 있습니다)");
+                showToast("저장 상태 불확실", "error");
             }
         },
         cancelVoiceModal: () => {
