@@ -119,7 +119,7 @@ window.kodaEngine = (() => {
     };
 
     const init = async () => {
-        console.log("세무정석 엔진 시작 (v1028)");
+        console.log("세무정석 엔진 시작 (v1029)");
 
         // v1028: Force hash to landing on cold load to prevent auto-redirect skip
         if (window.location.hash !== '#/') {
@@ -620,23 +620,18 @@ window.kodaEngine = (() => {
             get('report-modal').style.display = 'flex';
         },
         showPrevYearSummary: () => {
-            const now = new Date();
-            const curYear = now.getFullYear();
-            const totalRecords = state.records.length;
-            const totalAmt = state.records.reduce((acc, r) => acc + (Number(r.amount) || 0), 0);
-
+            get('report-title').innerText = "";
             let html = `
                 <div style="text-align:center; padding:1.5rem;">
-                    <div style="font-size:0.85rem; color:var(--text-muted); margin-bottom:0.5rem;">${curYear}년 누적 실적</div>
-                    <div style="font-size:1.8rem; font-weight:900; color:var(--primary); margin-bottom:2rem; letter-spacing:-0.05em;">${formatCurrency(totalAmt)}원</div>
-                    <div style="font-size:0.85rem; line-height:1.7; color:var(--text-muted); background:rgba(255,255,255,0.03); padding:1rem; border-radius:16px;">
-                        총 <b>${totalRecords}건</b>의 기록이 분석되었습니다.<br>
-                        전년도 데이터 연동 및 비교 분석은<br>
-                        데이터가 더 축적된 후 활성화됩니다.
+                    <div style="font-size:1.5rem; font-weight:800; color:var(--primary); margin-bottom:1.5rem;">💰 전년도 실적 분석</div>
+                    <div style="font-size:0.9rem; line-height:1.7; color:var(--text-muted); background:rgba(255,255,255,0.03); padding:1.5rem; border-radius:16px; text-align:left;">
+                        기존 데이터가 존재하지 않습니다.<br><br>
+                        올해(2026년) 기록이 충분히 쌓인 후,<br>
+                        연말 결산 과정을 통해<br>
+                        <b>공식 세무 분석 리포트</b>가 생성됩니다.
                     </div>
                 </div>
              `;
-            get('report-title').innerText = "전년도 세무 분석 리포트";
             get('report-content').innerHTML = html;
             get('report-modal').style.display = 'flex';
         },
