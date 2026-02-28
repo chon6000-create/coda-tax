@@ -136,7 +136,7 @@ window.kodaEngine = (() => {
     };
 
     const init = async () => {
-        alert("세무정석 엔진 시작 (v1022 - Features)");
+        alert("세무정석 엔진 시작 (v1023 - Fully Loaded)");
         onAuthStateChanged(auth, (user) => {
             console.log("onAuthStateChanged:", user ? user.email : 'no user');
             state.currentUser = user;
@@ -570,7 +570,6 @@ window.kodaEngine = (() => {
                     try { state.recognition.stop(); } catch (e) { }
                 }
 
-                showToast("백그라운드 저장 중... ⏳");
                 const savePromise = addDoc(collection(db, "users", state.currentUser.uid, "records"), recordToSave);
                 const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Firestore Timeout (20s)")), 20000));
 
@@ -628,18 +627,52 @@ window.kodaEngine = (() => {
         showYearlyCategorySummary: () => {
             const categories = {};
             state.records.forEach(r => {
-                const cat = r.label || r.category;
-                categories[cat] = (categories[cat] || 0) + (Number(r.amount) || 0);
+                const catId = r.category || '기타필요경비';
+                const label = r.label || catId;
+                const catMeta = state.categories.find(c => c.id === catId) || {};
+                const box = catMeta.box ? ` [${catMeta.box}]` : '';
+
+                if (!categories[label]) categories[label] = { amount: 0, box };
+                categories[label].amount += (Number(r.amount) || 0);
             });
-            let msg = "[카테고리별 실적]\n";
-            for (const [cat, amt] of Object.entries(categories)) {
-                msg += `${cat}: ${formatCurrency(amt)}원\n`;
+
+            let html = '<div style="font-size:0.9rem;">';
+            for (const [label, data] of Object.entries(categories)) {
+                html += `
+                    <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border-color);">
+                        <div>
+                            <span style="font-weight:700;">${label}</span>
+                            <span style="font-size:0.75rem; color:var(--text-muted);">${data.box}</span>
+                        </div>
+                        <span style="font-weight:700;">${formatCurrency(data.amount)}원</span>
+                    </div>`;
             }
-            alert(msg || "기록이 없습니다.");
+            html += '</div>';
+
+            get('report-title').innerText = "카테고리별 실적 (홈택스 기준)";
+            get('report-content').innerHTML = html || "데이터가 없습니다.";
+            get('report-modal').style.display = 'flex';
         },
         showPrevYearSummary: () => {
-            const yearlyTotal = state.records.reduce((acc, r) => acc + (Number(r.amount) || 0), 0);
-            alert(`[데이터 기반 통합 리포트]\n현재까지 누적 합계: ${formatCurrency(yearlyTotal)}원\n(전년도 데이터 연동 준비 중)`);
+            const now = new Date();
+            const curYear = now.getFullYear();
+            const totalRecords = state.records.length;
+            const totalAmt = state.records.reduce((acc, r) => acc + (Number(r.amount) || 0), 0);
+
+            let html = `
+                <div style="text-align:center; padding:1.5rem;">
+                    <div style="font-size:0.85rem; color:var(--text-muted); margin-bottom:0.5rem;">${curYear}년 누적 실적</div>
+                    <div style="font-size:1.8rem; font-weight:900; color:var(--primary); margin-bottom:2rem; letter-spacing:-0.05em;">${formatCurrency(totalAmt)}원</div>
+                    <div style="font-size:0.85rem; line-height:1.7; color:var(--text-muted); background:rgba(255,255,255,0.03); padding:1rem; border-radius:16px;">
+                        총 <b>${totalRecords}건</b>의 기록이 분석되었습니다.<br>
+                        전년도 데이터 연동 및 비교 분석은<br>
+                        데이터가 더 축적된 후 활성화됩니다.
+                    </div>
+                </div>
+             `;
+            get('report-title').innerText = "종합 세무 분석 리포트";
+            get('report-content').innerHTML = html;
+            get('report-modal').style.display = 'flex';
         },
         openHometax: () => window.open('https://www.hometax.go.kr', '_blank'),
         loginWithGoogle
