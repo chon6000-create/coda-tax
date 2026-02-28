@@ -83,7 +83,6 @@ window.kodaEngine = (() => {
 
     const handleRouting = () => {
         const hash = window.location.hash || '#/';
-        const isPaid = localStorage.getItem('yt_user_status') === 'paid';
         const landing = get('user-type-overlay');
         const dashboard = get('app-container');
 
@@ -92,11 +91,10 @@ window.kodaEngine = (() => {
         // CRITICAL: DO NOT ROUTE UNTIL AUTH IS INITIALIZED
         if (!state.isAuthInitialized) {
             console.log("Routing deferred - Auth not initialized");
-            // Show a simple loading if needed, or just stay put
             return;
         }
 
-        console.log("Routing Execution - Hash:", hash, "User:", state.currentUser ? state.currentUser.email : 'null', "isPaid:", isPaid);
+        console.log("Routing Execution - Hash:", hash, "User:", state.currentUser ? state.currentUser.email : 'null');
 
         if (hash === '#/dashboard' || hash.startsWith('#/dashboard')) {
             // If strictly logged in, show dashboard
@@ -121,14 +119,21 @@ window.kodaEngine = (() => {
     };
 
     const init = async () => {
-        console.log("세무정석 엔진 시작 (v1027)");
+        console.log("세무정석 엔진 시작 (v1028)");
+
+        // v1028: Force hash to landing on cold load to prevent auto-redirect skip
+        if (window.location.hash !== '#/') {
+            console.log("Forcing landing page on load");
+            window.location.hash = '#/';
+        }
+
         onAuthStateChanged(auth, (user) => {
             console.log("onAuthStateChanged:", user ? user.email : 'no user');
             state.currentUser = user;
             state.isAuthInitialized = true; // Mark as initialized
 
             if (user) {
-                // localStorage yt_user_status removed in v1027 to prevent auto-redirect race
+                // Ensure no yt_user_status is used for routing decisions
                 const q = query(collection(db, "users", user.uid, "records"), orderBy("date", "desc"));
                 onSnapshot(q, (snap) => {
                     console.log("Firestore Snapshot received, count:", snap.docs.length);
@@ -337,7 +342,6 @@ window.kodaEngine = (() => {
             await createUserWithEmailAndPassword(auth, email, pw);
             get('payment-view-success').style.display = 'none';
             get('payment-view-final-success').style.display = 'block';
-            localStorage.setItem('yt_user_status', 'paid');
         } catch (err) {
             if (submitBtn) {
                 submitBtn.disabled = false;
@@ -370,7 +374,6 @@ window.kodaEngine = (() => {
             alert("로그인 성공! (UID: " + result.user.uid.slice(0, 5) + ")");
             state.currentUser = result.user;
             state.isAuthInitialized = true;
-            localStorage.setItem('yt_user_status', 'paid');
             navigate('/dashboard');
         } catch (err) {
             console.error("Login Error:", err);
@@ -386,7 +389,6 @@ window.kodaEngine = (() => {
                 // Update state immediately to prevent routing race
                 state.currentUser = result.user;
                 state.isAuthInitialized = true;
-                localStorage.setItem('yt_user_status', 'paid');
                 console.log("Google Login success - Redirecting...");
                 navigate('/dashboard');
             }
@@ -454,7 +456,6 @@ window.kodaEngine = (() => {
             if (confirm("로그아웃 하시겠습니까?")) {
                 try {
                     await signOut(auth);
-                    localStorage.removeItem('yt_user_status');
                     // Force a hard reload to clear all states and redirect to landing
                     window.location.href = window.location.pathname + '#/';
                     window.location.reload();
@@ -614,7 +615,7 @@ window.kodaEngine = (() => {
             }
             html += '</div>';
 
-            get('report-title').innerText = "카테고리별 실적 (홈택스 기준)";
+            get('report-title').innerText = "올해 실적 상세 리포트";
             get('report-content').innerHTML = html || "데이터가 없습니다.";
             get('report-modal').style.display = 'flex';
         },
