@@ -99,25 +99,14 @@ window.kodaEngine = (() => {
         console.log("Routing Execution - Hash:", hash, "User:", state.currentUser ? state.currentUser.email : 'null', "isPaid:", isPaid);
 
         if (hash === '#/dashboard' || hash.startsWith('#/dashboard')) {
-            // If logged in, we are good
+            // If strictly logged in, show dashboard
             if (state.currentUser) {
-                landing.style.display = 'none';
-                dashboard.style.display = 'flex';
-                render();
-            }
-            // If not logged in but has "paid" flag, we might let them see the container
-            // but the data will be restricted by Firestore rules anyway.
-            else if (isPaid) {
-                // If we're here, it means we don't have a user but have 'paid' flag
-                // This might be a race where Firebase is slow.
-                console.log("Showing dashboard with 'paid' flag but no user yet");
                 landing.style.display = 'none';
                 dashboard.style.display = 'flex';
                 render();
             }
             // Otherwise, boot to landing
             else {
-                alert("로그인이 필요합니다. (Routing: redirect to landing)");
                 console.log("Access denied - Redirecting to landing");
                 navigate('/');
             }
@@ -136,7 +125,7 @@ window.kodaEngine = (() => {
     };
 
     const init = async () => {
-        alert("세무정석 엔진 시작 (v1023 - Fully Loaded)");
+        console.log("세무정석 엔진 시작 (v1024)");
         onAuthStateChanged(auth, (user) => {
             console.log("onAuthStateChanged:", user ? user.email : 'no user');
             state.currentUser = user;
