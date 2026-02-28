@@ -119,7 +119,7 @@ window.kodaEngine = (() => {
     };
 
     const init = async () => {
-        console.log("세무정석 엔진 시작 (v1029)");
+        console.log("세무정석 엔진 시작 (v1030)");
 
         // v1028: Force hash to landing on cold load to prevent auto-redirect skip
         if (window.location.hash !== '#/') {
@@ -620,19 +620,45 @@ window.kodaEngine = (() => {
             get('report-modal').style.display = 'flex';
         },
         showPrevYearSummary: () => {
-            get('report-title').innerText = "";
-            let html = `
-                <div style="text-align:center; padding:1.5rem;">
-                    <div style="font-size:1.5rem; font-weight:800; color:var(--primary); margin-bottom:1.5rem;">💰 전년도 실적 분석</div>
-                    <div style="font-size:0.9rem; line-height:1.7; color:var(--text-muted); background:rgba(255,255,255,0.03); padding:1.5rem; border-radius:16px; text-align:left;">
-                        기존 데이터가 존재하지 않습니다.<br><br>
-                        올해(2026년) 기록이 충분히 쌓인 후,<br>
-                        연말 결산 과정을 통해<br>
-                        <b>공식 세무 분석 리포트</b>가 생성됩니다.
+            const records2025 = state.records.filter(r => r.date && r.date.startsWith('2025-'));
+            get('report-title').innerText = "2025년도 세무 분석 리포트";
+
+            if (records2025.length === 0) {
+                let html = `
+                    <div style="text-align:center; padding:1.5rem;">
+                        <div style="font-size:1.5rem; font-weight:800; color:var(--primary); margin-bottom:1.5rem;">💰 2025년 실적 데이터 미비</div>
+                        <div style="font-size:0.9rem; line-height:1.7; color:var(--text-muted); background:rgba(255,255,255,0.03); padding:1.5rem; border-radius:16px; text-align:left;">
+                            현재 2025년도로 표시된 기록이 없습니다.<br><br>
+                            종합소득세 신고를 위해 2025년도 내역이 필요하시다면,<br>
+                            '직접 입력'을 통해 날짜를 2025년으로 설정하여 기록해 주세요.
+                        </div>
                     </div>
-                </div>
-             `;
-            get('report-content').innerHTML = html;
+                `;
+                get('report-content').innerHTML = html;
+            } else {
+                const categories = {};
+                records2025.forEach(r => {
+                    const label = (r.type === 'income') ? '유튜브 수입 (애드센스)' : (r.category || '기타비용');
+                    const box = (r.type === 'income') ? '매출' : '비용';
+                    if (!categories[label]) categories[label] = { amount: 0, box };
+                    categories[label].amount += (Number(r.amount) || 0);
+                });
+
+                let html = '<div style="font-size:0.9rem;">';
+                html += '<div style="background:rgba(59,130,246,0.1); padding:12px; border-radius:12px; margin-bottom:15px; color:var(--primary); font-weight:700; text-align:center; font-size:1rem;">2025년 총 결산 완료</div>';
+                for (const [label, data] of Object.entries(categories)) {
+                    html += `
+                        <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border-color);">
+                            <div>
+                                <span style="font-weight:700;">${label}</span>
+                                <span style="font-size:0.75rem; color:var(--text-muted);">${data.box}</span>
+                            </div>
+                            <span style="font-weight:700;">${formatCurrency(data.amount)}원</span>
+                        </div>`;
+                }
+                html += '</div>';
+                get('report-content').innerHTML = html;
+            }
             get('report-modal').style.display = 'flex';
         },
         closeReportModal: () => {
