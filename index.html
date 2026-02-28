@@ -1,26 +1,23 @@
-// NUCLEAR CACHE BUSTING - v1021 - FINAL STABLE
-(function () {
-const VERSION = 'v1021';
-if (localStorage.getItem('app_v') !== VERSION) {
-console.log("Nuclear Reset to " + VERSION);
-localStorage.clear();
-localStorage.setItem('app_v', VERSION);
-
-// FORCE SERVICE WORKER CLEAR
-if ('serviceWorker' in navigator) {
-navigator.serviceWorker.getRegistrations().then(function(registrations) {
-for(let registration of registrations) {
-registration.unregister();
-}
-});
-}
-location.reload(true);
-}
-})();
+<script>
+    // NUCLEAR CACHE BUSTING - v1022 - Feature Restoration
+    (function () {
+        const VERSION = 'v1022';
+        if (localStorage.getItem('app_v') !== VERSION) {
+            console.log("Nuclear Reset to " + VERSION);
+            localStorage.clear();
+            localStorage.setItem('app_v', VERSION);
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(function (regs) {
+                    for (let r of regs) r.unregister();
+                });
+            }
+            location.reload(true);
+        }
+    })();
 </script>
 
-<title>세무정석 - v1021</title>
-<link rel="stylesheet" href="SeomuFix.css?v=1021">
+<title>세무정석 - v1022</title>
+<link rel="stylesheet" href="SeomuFix.css?v=1022">
 <link rel="stylesheet" as="style" crossorigin
     href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
 <!-- Portone (Iamport) SDK -->
@@ -413,7 +410,7 @@ location.reload(true);
     <div id="app-container" class="app-container" style="display:none;">
         <div style="position:fixed; top:5px; right:5px; font-size:10px; color:rgba(255,255,255,0.1); z-index:10000;">
             v1021</div>
-        <header style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3rem;">
+        <header style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
             <h1 style="font-size:1.5rem; font-weight:900;">세무정석</h1>
             <div id="user-status-indicator" style="font-size:0.8rem; color:var(--text-muted);">
                 <span id="logged-in-user-id"></span>님
@@ -422,39 +419,72 @@ location.reload(true);
             </div>
         </header>
 
-        <section style="text-align:center; margin-bottom:4rem;">
-            <div style="position:relative; display:inline-block; margin-bottom:1.5rem;">
+        <!-- New Summary Dashboard -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px;">
+            <div
+                style="grid-column: span 2; background: rgba(59, 130, 246, 0.05); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 20px; padding: 20px;">
+                <span style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px; display: block;">이번 달
+                    수입</span>
+                <span id="monthly-income-total"
+                    style="font-size: 1.5rem; font-weight: 800; color: var(--primary);">0원</span>
+            </div>
+            <div
+                style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); border-radius: 20px; padding: 16px;">
+                <span style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px; display: block;">이번 달
+                    경비</span>
+                <span id="monthly-expense-total"
+                    style="font-size: 1.25rem; font-weight: 800; color: var(--danger);">0원</span>
+            </div>
+            <div
+                style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); border-radius: 20px; padding: 16px;">
+                <span style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px; display: block;">남은
+                    수익</span>
+                <span id="monthly-profit-total"
+                    style="font-size: 1.25rem; font-weight: 800; color: var(--success);">0원</span>
+            </div>
+        </div>
+
+        <section style="text-align:center; margin-bottom:3rem;">
+            <div style="position:relative; display:inline-block; margin-bottom:1rem;">
                 <div
-                    style="position:absolute; inset:-15px; background:var(--primary); opacity:0.2; border-radius:50%; animation: pulse 2s infinite; pointer-events: none;">
+                    style="position:absolute; inset:-12px; background:var(--primary); opacity:0.1; border-radius:50%; animation: pulse 2s infinite; pointer-events: none;">
                 </div>
                 <button onclick="kodaEngine.startVoiceRecord()"
-                    style="width:100px; height:100px; border-radius:50%; background:var(--primary); border:none; color:white; font-size:2.5rem; cursor:pointer; position:relative;">🎙️</button>
+                    style="width:90px; height:90px; border-radius:50%; background:var(--primary); border:none; color:white; font-size:2rem; cursor:pointer; position:relative;">🎙️</button>
             </div>
-            <h2 style="font-size:1.2rem; font-weight:700;">내역 말하기</h2>
-            <p style="color:var(--text-muted); font-size:0.9rem;">"소품비 3만원", "애드센스 100만원"</p>
+            <h2 style="font-size:1.1rem; font-weight:700;">내역 말하기</h2>
+            <p style="color:var(--text-muted); font-size:0.85rem;">"소품비 3만원", "애드센스 100만원"</p>
             <button onclick="kodaEngine.openAddModal()"
-                style="margin-top:1.5rem; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:var(--text-muted); padding:10px 20px; border-radius:20px; cursor:pointer;">직접
+                style="margin-top:1rem; background:rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: var(--text-muted); padding: 8px 16px; border-radius: 12px; cursor: pointer; font-size: 0.8rem;">직접
                 입력</button>
         </section>
 
         <section
-            style="background:var(--bg-card); border-radius:24px; padding:1.5rem; border:1px solid rgba(255,255,255,0.05);">
-            <h3 style="margin-top:0; font-size:1rem; color:var(--text-muted);">최근 내역</h3>
-            <table class="records-table">
+            style="background:var(--card-bg); border-radius:24px; padding:1.25rem; border:1px solid rgba(255,255,255,0.05);">
+            <h3 style="margin-top:0; font-size:0.9rem; color:var(--text-muted); margin-bottom: 1rem;">최근 기록</h3>
+            <table class="records-table" style="width: 100%; font-size: 0.9rem;">
                 <tbody id="history-list-mvp"></tbody>
             </table>
         </section>
 
         <nav
-            style="position:fixed; bottom:0; left:0; right:0; height:70px; background: rgba(11, 18, 32, 0.8); backdrop-filter: blur(10px); border-top:1px solid rgba(255,255,255,0.05); display:flex; justify-content:space-around; align-items:center;">
+            style="position:fixed; bottom:0; left:0; right:0; height:80px; background: rgba(11, 18, 32, 0.9); backdrop-filter: blur(20px); border-top:1px solid var(--border-color); display:flex; justify-content:space-around; align-items:center; z-index: 4000;">
             <button onclick="kodaEngine.navigate('/dashboard')"
-                style="background:none; border:none; color:var(--primary); font-size:1.5rem;">🏠</button>
+                style="background:none; border:none; color:var(--primary); cursor:pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 0.7rem; font-weight: 600;">
+                <span style="font-size: 1.5rem;">🏠</span> 홈
+            </button>
             <button onclick="kodaEngine.showYearlyCategorySummary()"
-                style="background:none; border:none; color:var(--text-muted); font-size:1.5rem;">📊</button>
+                style="background:none; border:none; color:var(--text-muted); cursor:pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 0.7rem; font-weight: 600;">
+                <span style="font-size: 1.5rem;">📊</span> 실적
+            </button>
             <button onclick="kodaEngine.showPrevYearSummary()"
-                style="background:none; border:none; color:var(--text-muted); font-size:1.5rem;">💰</button>
+                style="background:none; border:none; color:var(--text-muted); cursor:pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 0.7rem; font-weight: 600;">
+                <span style="font-size: 1.5rem;">💰</span> 작년
+            </button>
             <button onclick="kodaEngine.openHometax()"
-                style="background:none; border:none; color:var(--text-muted); font-size:1.5rem;">🏛️</button>
+                style="background:none; border:none; color:var(--text-muted); cursor:pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 0.7rem; font-weight: 600;">
+                <span style="font-size: 1.5rem;">🏛️</span> 홈택스
+            </button>
         </nav>
     </div>
 

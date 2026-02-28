@@ -136,7 +136,7 @@ window.kodaEngine = (() => {
     };
 
     const init = async () => {
-        alert("세무정석 엔진 시작 (v1021 - Stable)");
+        alert("세무정석 엔진 시작 (v1022 - Features)");
         onAuthStateChanged(auth, (user) => {
             console.log("onAuthStateChanged:", user ? user.email : 'no user');
             state.currentUser = user;
@@ -293,6 +293,28 @@ window.kodaEngine = (() => {
             const statusIndicator = get('user-status-indicator');
             if (statusIndicator) statusIndicator.style.display = 'none';
         }
+
+        // --- Calculate Dashboard Summaries (This Month) ---
+        let incomeTotal = 0;
+        let expenseTotal = 0;
+        const now = new Date();
+        const curMonth = (now.getMonth() + 1).toString().padStart(2, '0');
+        const curYear = now.getFullYear().toString();
+
+        state.records.forEach(r => {
+            if (r.date && r.date.startsWith(`${curYear}-${curMonth}`)) {
+                if (r.type === 'income') incomeTotal += (Number(r.amount) || 0);
+                else expenseTotal += (Number(r.amount) || 0);
+            }
+        });
+
+        const incomeEl = get('monthly-income-total');
+        const expenseEl = get('monthly-expense-total');
+        const profitEl = get('monthly-profit-total');
+
+        if (incomeEl) incomeEl.innerText = formatCurrency(incomeTotal) + '원';
+        if (expenseEl) expenseEl.innerText = formatCurrency(expenseTotal) + '원';
+        if (profitEl) profitEl.innerText = formatCurrency(incomeTotal - expenseTotal) + '원';
 
         const list = get('history-list-mvp');
         if (!list) return;
@@ -534,8 +556,6 @@ window.kodaEngine = (() => {
                 saveBtn.innerText = "저장 중...";
             }
             try {
-                alert("디버그: Firestore 저장 시도 시작 (v1021)");
-
                 // OPTIMISTIC CLOSURE
                 const recordToSave = { ...state.lastDetected };
                 get('voice-modal').style.display = 'none';
@@ -550,16 +570,16 @@ window.kodaEngine = (() => {
                     try { state.recognition.stop(); } catch (e) { }
                 }
 
+                showToast("백그라운드 저장 중... ⏳");
                 const savePromise = addDoc(collection(db, "users", state.currentUser.uid, "records"), recordToSave);
-                const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Firestore Timeout (10s)")), 10000));
+                const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Firestore Timeout (20s)")), 20000));
 
                 const docRef = await Promise.race([savePromise, timeoutPromise]);
                 console.log("Firestore Save Success - ID:", docRef.id);
-                showToast("내역이 저장되었습니다! 🎉");
+                showToast("심어두기가 완료되었습니다! 🎉");
             } catch (e) {
                 console.error("Firestore Save Error/Timeout:", e);
-                alert("저장 응답 지연: " + e.message + "\n(데이터는 이미 서버에 전송되었을 수 있습니다)");
-                showToast("저장 상태 불확실", "error");
+                showToast("저장 응답이 지연되고 있습니다.", "error");
             }
         },
         cancelVoiceModal: () => {
@@ -605,8 +625,22 @@ window.kodaEngine = (() => {
                 await deleteDoc(doc(db, "users", state.currentUser.uid, "records", id));
             }
         },
-        showYearlyCategorySummary: () => alert("상세 리포트 준비중입니다."),
-        showPrevYearSummary: () => alert("전년도 세무 리포트 준비중입니다."),
+        showYearlyCategorySummary: () => {
+            const categories = {};
+            state.records.forEach(r => {
+                const cat = r.label || r.category;
+                categories[cat] = (categories[cat] || 0) + (Number(r.amount) || 0);
+            });
+            let msg = "[카테고리별 실적]\n";
+            for (const [cat, amt] of Object.entries(categories)) {
+                msg += `${cat}: ${formatCurrency(amt)}원\n`;
+            }
+            alert(msg || "기록이 없습니다.");
+        },
+        showPrevYearSummary: () => {
+            const yearlyTotal = state.records.reduce((acc, r) => acc + (Number(r.amount) || 0), 0);
+            alert(`[데이터 기반 통합 리포트]\n현재까지 누적 합계: ${formatCurrency(yearlyTotal)}원\n(전년도 데이터 연동 준비 중)`);
+        },
         openHometax: () => window.open('https://www.hometax.go.kr', '_blank'),
         loginWithGoogle
     };
