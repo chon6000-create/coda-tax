@@ -113,19 +113,15 @@ window.kodaEngine = (() => {
         }
         else {
             // On Landing Page (#/)
-            // If already logged in, go to dashboard
-            if (state.currentUser) {
-                console.log("Already logged in - Redirecting to dashboard");
-                navigate('/dashboard');
-            } else {
-                landing.style.display = 'flex';
-                dashboard.style.display = 'none';
-            }
+            // v1025: DO NOT AUTO-REDIRECT to dashboard if logged in.
+            // Let the user click Login/Start to proceed.
+            landing.style.display = 'flex';
+            dashboard.style.display = 'none';
         }
     };
 
     const init = async () => {
-        console.log("세무정석 엔진 시작 (v1024)");
+        console.log("세무정석 엔진 시작 (v1025)");
         onAuthStateChanged(auth, (user) => {
             console.log("onAuthStateChanged:", user ? user.email : 'no user');
             state.currentUser = user;
@@ -185,7 +181,7 @@ window.kodaEngine = (() => {
                 console.error("Speech Recognition Error:", event.error);
                 const statusText = get('voice-status-text');
                 if (statusText) statusText.innerText = "인식 오류: " + event.error;
-                alert("음성 인식 오류: " + event.error + "\n(마이크 권한 또는 브라우저 지원 확인 필요)");
+                // alert removed in v1025 for better UX
             };
             state.recognition.onend = () => {
                 console.log("Speech Recognition Ended");
@@ -567,7 +563,7 @@ window.kodaEngine = (() => {
                 showToast("심어두기가 완료되었습니다! 🎉");
             } catch (e) {
                 console.error("Firestore Save Error/Timeout:", e);
-                showToast("저장 응답이 지연되고 있습니다.", "error");
+                // "Response delayed" toast removed in v1025 as it causes anxiety.
             }
         },
         cancelVoiceModal: () => {
