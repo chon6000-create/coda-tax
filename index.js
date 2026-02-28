@@ -44,10 +44,9 @@ window.kodaEngine = (() => {
         ],
         lastDetected: null,
         recognition: null,
-        pendingCategory: null,
-        pendingYear: null,
         isAuthInitialized: false, // New flag
         voiceTargetYear: null, // Track target year for voice entries
+        currentYear: new Date().getFullYear(), // Added for dynamic year handling
         portoneId: 'imp33124838' // Verified from user's V1 API tab
     };
 
@@ -120,7 +119,7 @@ window.kodaEngine = (() => {
     };
 
     const init = async () => {
-        console.log("유튜버 종합소득세 신고앱 시작 (v1032)");
+        console.log("유튜버 종합소득세 신고앱 시작 (v1033)");
 
         // v1028: Force hash to landing on cold load to prevent auto-redirect skip
         if (window.location.hash !== '#/') {
@@ -608,8 +607,10 @@ window.kodaEngine = (() => {
             }
         },
         showYearlyCategorySummary: () => {
+            const currentYear = state.currentYear;
+            const recordsCurrentYear = state.records.filter(r => r.date && r.date.startsWith(currentYear + '-'));
             const categories = {};
-            state.records.forEach(r => {
+            recordsCurrentYear.forEach(r => {
                 const catId = r.category || '기타필요경비';
                 const label = r.label || catId;
                 const catMeta = state.categories.find(c => c.id === catId) || {};
@@ -620,28 +621,43 @@ window.kodaEngine = (() => {
             });
 
             let html = '<div style="font-size:0.9rem;">';
-            for (const [label, data] of Object.entries(categories)) {
-                html += `
-                    <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border-color);">
-                        <div>
-                            <span style="font-weight:700;">${label}</span>
-                            <span style="font-size:0.75rem; color:var(--text-muted);">${data.box}</span>
-                        </div>
-                        <span style="font-weight:700;">${formatCurrency(data.amount)}원</span>
-                    </div>`;
+            html += `
+                <div style="background:rgba(59,130,246,0.1); padding:20px; border-radius:16px; margin-bottom:20px; text-align:center;">
+                    <div style="font-size:0.8rem; color:var(--primary); margin-bottom:10px; font-weight:700;">🎤 ${currentYear}년 내역 항목별 입력</div>
+                    <button onclick="kodaEngine.startVoiceRecord('${currentYear}')"
+                        style="width:50px; height:50px; border-radius:50%; background:var(--primary); border:none; color:white; font-size:1.2rem; cursor:pointer; box-shadow:0 8px 16px rgba(59,130,246,0.3);">🎙️</button>
+                    <div style="margin-top:10px; font-size:0.75rem; color:var(--text-muted);">"교통비 20만원" 처럼 말씀해 주세요.</div>
+                </div>
+            `;
+            html += `<div style="background:rgba(255,255,255,0.05); padding:12px; border-radius:12px; margin-bottom:15px; color:var(--text-primary); font-weight:700; text-align:center; font-size:0.95rem;">${currentYear}년 종합소득세 신고용 결산</div>`;
+
+            if (recordsCurrentYear.length === 0) {
+                html += '<div style="text-align:center; padding:2rem; color:var(--text-muted); font-size:0.85rem;">기록된 데이터가 없습니다.</div>';
+            } else {
+                for (const [label, data] of Object.entries(categories)) {
+                    html += `
+                        <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border-color);">
+                            <div>
+                                <span style="font-weight:700;">${label}</span>
+                                <span style="font-size:0.75rem; color:var(--text-muted);">${data.box}</span>
+                            </div>
+                            <span style="font-weight:700;">${formatCurrency(data.amount)}원</span>
+                        </div>`;
+                }
             }
             html += '</div>';
 
-            get('report-title').innerText = "올해 실적";
+            get('report-title').innerText = `${currentYear}년 실적`;
             get('report-content').innerHTML = html || "데이터가 없습니다.";
             get('report-modal').style.display = 'flex';
         },
         showPrevYearSummary: () => {
-            const records2025 = state.records.filter(r => r.date && r.date.startsWith('2025-'));
-            get('report-title').innerText = "2025년도 실적 내역";
+            const prevYear = state.currentYear - 1;
+            const recordsPrevYear = state.records.filter(r => r.date && r.date.startsWith(prevYear + '-'));
+            get('report-title').innerText = "전년도 실적";
 
             const categories = {};
-            records2025.forEach(r => {
+            recordsPrevYear.forEach(r => {
                 const label = (r.type === 'income') ? '유튜브 수입 (애드센스)' : (r.category || '기타비용');
                 const box = (r.type === 'income') ? '매출' : '비용';
                 if (!categories[label]) categories[label] = { amount: 0, box };
@@ -651,15 +667,15 @@ window.kodaEngine = (() => {
             let html = '<div style="font-size:0.9rem;">';
             html += `
                 <div style="background:rgba(59,130,246,0.1); padding:20px; border-radius:16px; margin-bottom:20px; text-align:center;">
-                    <div style="font-size:0.8rem; color:var(--primary); margin-bottom:10px; font-weight:700;">🎤 2025년도 내역 항목별 입력</div>
-                    <button onclick="kodaEngine.startVoiceRecord('2025')"
+                    <div style="font-size:0.8rem; color:var(--primary); margin-bottom:10px; font-weight:700;">🎤 전년도(${prevYear}년) 내역 항목별 입력</div>
+                    <button onclick="kodaEngine.startVoiceRecord('${prevYear}')"
                         style="width:50px; height:50px; border-radius:50%; background:var(--primary); border:none; color:white; font-size:1.2rem; cursor:pointer; box-shadow:0 8px 16px rgba(59,130,246,0.3);">🎙️</button>
-                    <div style="margin-top:10px; font-size:0.75rem; color:var(--text-muted);">"2025년 교통비 20만원" 처럼 말씀해 주세요.</div>
+                    <div style="margin-top:10px; font-size:0.75rem; color:var(--text-muted);">"교통비 20만원" 처럼 말씀해 주세요.</div>
                 </div>
             `;
-            html += '<div style="background:rgba(255,255,255,0.05); padding:12px; border-radius:12px; margin-bottom:15px; color:var(--text-primary); font-weight:700; text-align:center; font-size:0.95rem;">2025년 종합소득세 신고용 결산</div>';
+            html += `<div style="background:rgba(255,255,255,0.05); padding:12px; border-radius:12px; margin-bottom:15px; color:var(--text-primary); font-weight:700; text-align:center; font-size:0.95rem;">전년도(${prevYear}년) 종합소득세 신고용 결산</div>`;
 
-            if (records2025.length === 0) {
+            if (recordsPrevYear.length === 0) {
                 html += '<div style="text-align:center; padding:2rem; color:var(--text-muted); font-size:0.85rem;">기록된 데이터가 없습니다.</div>';
             } else {
                 for (const [label, data] of Object.entries(categories)) {
