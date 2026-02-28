@@ -3,7 +3,9 @@ import {
     signInWithEmailAndPassword,
     createUserWithEmailAndPassword,
     onAuthStateChanged,
-    signOut
+    signOut,
+    GoogleAuthProvider,
+    signInWithPopup
 } from "firebase/auth";
 import {
     collection,
@@ -23,31 +25,45 @@ window.kodaEngine = (() => {
         currentUser: null,
         records: [],
         categories: [
-            { id: '수입 합계', keywords: ['애드센스', '협찬', '수입', '입금', '광고수익', '도네', '후원'], type: 'income', box: '수입' },
-            { id: '식대', keywords: ['식대', '밥', '회식', '미팅', '커피'], type: 'expense', box: '15' },
-            { id: '여비교통비', keywords: ['교통', '차비', '택시', '버스', '지하철', '주유', '기름'], type: 'expense', box: '15' },
-            { id: '촬영소품', keywords: ['소품', '배경', '의상', '분장'], type: 'expense', box: '11' },
-            { id: '장비비', keywords: ['장비', '카메라', '마이크', '조명', '렌즈', '컴퓨터', 'PC'], type: 'expense', box: '22' },
-            { id: '소프트웨어/구독', keywords: ['구독', '툴', '프로그램', '편집툴', '클라우드', '어도비', '프리미어', '라이선스'], type: 'expense', box: '22' },
-            { id: '외주/편집', keywords: ['외주', '편집', '디자인', '썸네일', '컷편집'], type: 'expense', box: '21' },
-            { id: '통신비', keywords: ['통신', '인터넷', '휴대폰'], type: 'expense', box: '19' },
-            { id: '소모품비', keywords: ['소모품', '사무용품', '펜', '종이', '문구'], type: 'expense', box: '22' },
-            { id: '수선유지비', keywords: ['수선', '유지', '수리', '보수'], type: 'expense', box: '22' },
-            { id: '월세/임차료', keywords: ['월세', '임대료', '임차료', '관리비'], type: 'expense', box: '13' },
-            { id: '수도광열비', keywords: ['수도', '전기', '가스', '난방'], type: 'expense', box: '18' },
-            { id: '보험료', keywords: ['보험', '국민연금', '건강보험', '자동차보험'], type: 'expense', box: '15' },
-            { id: '세금과공과', keywords: ['세금', '면허세', '재산세', '공과금'], type: 'expense', box: '20' },
-            { id: '지급수수료', keywords: ['수수료', '뱅킹수수료', '결제수수료'], type: 'expense', box: '21' },
+            { id: '수입 합계', keywords: ['애드센스', '협찬', '수입', '입금', '광고수익', '도네', '후원', '정산'], type: 'income', box: '수입' },
+            { id: '식대', keywords: ['식대', '밥', '회식', '미팅', '커피', '편의점', '식사'], type: 'expense', box: '15' },
+            { id: '여비교통비', keywords: ['교통', '차비', '택시', '버스', '지하철', '주유', '기름', '톨게이트', '주차'], type: 'expense', box: '15' },
+            { id: '촬영소품', keywords: ['소품', '배경', '의상', '분장', '액세서리', '가발'], type: 'expense', box: '11' },
+            { id: '장비비', keywords: ['장비', '카메라', '마이크', '조명', '렌즈', '컴퓨터', 'PC', '모니터', '삼각대'], type: 'expense', box: '22' },
+            { id: '소프트웨어/구독', keywords: ['구독', '툴', '프로그램', '편집툴', '클라우드', '어도비', '프리미어', '라이선스', '폰트'], type: 'expense', box: '22' },
+            { id: '외주/편집', keywords: ['외주', '편집', '디자인', '썸네일', '컷편집', '제작비'], type: 'expense', box: '21' },
+            { id: '통신비', keywords: ['통신', '인터넷', '휴대폰', '요금제'], type: 'expense', box: '19' },
+            { id: '소모품비', keywords: ['소모품', '사무용품', '펜', '종이', '문구', '건전지'], type: 'expense', box: '22' },
+            { id: '수선유지비', keywords: ['수선', '유지', '수리', '보수', '수리비'], type: 'expense', box: '22' },
+            { id: '월세/임차료', keywords: ['월세', '임대료', '임차료', '관리비', '스튜디오'], type: 'expense', box: '13' },
+            { id: '수도광열비', keywords: ['수도', '전기', '가스', '난방', '냉난방'], type: 'expense', box: '18' },
+            { id: '보험료', keywords: ['보험', '국민연금', '건강보험', '자동차보험', '산재'], type: 'expense', box: '15' },
+            { id: '세금과공과', keywords: ['세금', '면허세', '재산세', '공과금', '범칙금'], type: 'expense', box: '20' },
+            { id: '지급수수료', keywords: ['수수료', '뱅킹수수료', '결제수수료', '이체수수료'], type: 'expense', box: '21' },
             { id: '기타필요경비', keywords: [], type: 'expense', box: '22' }
         ],
         lastDetected: null,
         recognition: null,
         pendingCategory: null,
-        pendingYear: null
+        pendingYear: null,
+        isAuthInitialized: false, // New flag
+        portoneId: 'imp33124838' // Verified from user's V1 API tab
     };
 
     const get = (id) => document.getElementById(id);
     const formatCurrency = (num) => new Intl.NumberFormat('ko-KR').format(Math.floor(num));
+
+    const showToast = (msg, type = 'success') => {
+        let toast = get('app-toast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'app-toast';
+            document.body.appendChild(toast);
+        }
+        toast.innerText = msg;
+        toast.className = `toast-visible ${type}`;
+        setTimeout(() => toast.className = '', 3000);
+    };
 
     const hometaxInfo = {
         '11': { label: '매입비용(촬영소품)', scope: '콘텐츠 촬영용 소품, 의상, 배경지 등' },
@@ -73,37 +89,75 @@ window.kodaEngine = (() => {
 
         if (!landing || !dashboard) return;
 
+        // CRITICAL: DO NOT ROUTE UNTIL AUTH IS INITIALIZED
+        if (!state.isAuthInitialized) {
+            console.log("Routing deferred - Auth not initialized");
+            // Show a simple loading if needed, or just stay put
+            return;
+        }
+
+        console.log("Routing Execution - Hash:", hash, "User:", state.currentUser ? state.currentUser.email : 'null', "isPaid:", isPaid);
+
         if (hash === '#/dashboard' || hash.startsWith('#/dashboard')) {
-            if (!state.currentUser && !isPaid) { navigate('/'); return; }
-            landing.style.display = 'none';
-            dashboard.style.display = 'flex';
-            render();
-        } else {
-            landing.style.display = 'flex';
-            dashboard.style.display = 'none';
+            // If logged in, we are good
+            if (state.currentUser) {
+                landing.style.display = 'none';
+                dashboard.style.display = 'flex';
+                render();
+            }
+            // If not logged in but has "paid" flag, we might let them see the container
+            // but the data will be restricted by Firestore rules anyway.
+            else if (isPaid) {
+                // If we're here, it means we don't have a user but have 'paid' flag
+                // This might be a race where Firebase is slow.
+                console.log("Showing dashboard with 'paid' flag but no user yet");
+                landing.style.display = 'none';
+                dashboard.style.display = 'flex';
+                render();
+            }
+            // Otherwise, boot to landing
+            else {
+                alert("로그인이 필요합니다. (Routing: redirect to landing)");
+                console.log("Access denied - Redirecting to landing");
+                navigate('/');
+            }
+        }
+        else {
+            // On Landing Page (#/)
+            // If already logged in, go to dashboard
+            if (state.currentUser) {
+                console.log("Already logged in - Redirecting to dashboard");
+                navigate('/dashboard');
+            } else {
+                landing.style.display = 'flex';
+                dashboard.style.display = 'none';
+            }
         }
     };
 
-    const init = () => {
+    const init = async () => {
+        alert("세무정석 엔진 시작 (v1018)");
         onAuthStateChanged(auth, (user) => {
+            console.log("onAuthStateChanged:", user ? user.email : 'no user');
+            state.currentUser = user;
+            state.isAuthInitialized = true; // Mark as initialized
+
             if (user) {
-                state.currentUser = user;
                 localStorage.setItem('yt_user_status', 'paid');
                 const q = query(collection(db, "users", user.uid, "records"), orderBy("date", "desc"));
                 onSnapshot(q, (snap) => {
+                    console.log("Firestore Snapshot received, count:", snap.docs.length);
                     state.records = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                     render();
+                }, (err) => {
+                    console.error("Firestore Snapshot Error:", err);
                 });
-                if (window.location.hash === '#/') navigate('/dashboard');
-            } else {
-                state.currentUser = null;
-                localStorage.removeItem('yt_user_status');
-                navigate('/');
-                render();
             }
+
+            // Trigger routing now that we have a definitive answer from Firebase
+            handleRouting();
         });
 
-        handleRouting();
         window.addEventListener('hashchange', handleRouting);
 
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -128,12 +182,28 @@ window.kodaEngine = (() => {
                     if (resultBox) resultBox.style.display = 'block';
                 }
             };
+            state.recognition.onstart = () => {
+                console.log("Speech Recognition started");
+                const statusText = get('voice-status-text');
+                if (statusText) statusText.innerText = "듣고 있습니다... (연결됨)";
+            };
+            state.recognition.onerror = (event) => {
+                console.error("Speech Recognition Error:", event.error);
+                const statusText = get('voice-status-text');
+                if (statusText) statusText.innerText = "인식 오류: " + event.error;
+                alert("음성 인식 오류: " + event.error + "\n(마이크 권한 또는 브라우저 지원 확인 필요)");
+            };
+            state.recognition.onend = () => {
+                console.log("Speech Recognition Ended");
+            };
         }
     };
 
     const parseAmountOnly = (text) => {
         let amount = 0;
         let cleanText = text.replace(/[\s,]/g, '').replace(/원$/g, '');
+
+        // 1. Digit-based parsing (20만, 1억 2천만, etc.)
         const eokMatch = cleanText.match(/([\d\.]+)\s*억/);
         if (eokMatch) amount += parseFloat(eokMatch[1]) * 100000000;
         const cheonmanMatch = cleanText.match(/([\d\.]+)\s*천만/);
@@ -146,6 +216,38 @@ window.kodaEngine = (() => {
             const simpleManMatch = cleanText.match(/([\d\.]+)\s*만/);
             if (simpleManMatch) amount += parseFloat(simpleManMatch[1]) * 10000;
         }
+
+        // 2. Korean word-based parsing (이십, 오만, etc.)
+        if (amount === 0) {
+            const korMap = { '일': 1, '이': 2, '삼': 3, '사': 4, '오': 5, '육': 6, '칠': 7, '팔': 8, '구': 9, '십': 10, '백': 100, '천': 1000, '만': 10000, '억': 100000000 };
+            const unitMap = { '십': 10, '백': 100, '천': 1000, '만': 10000, '억': 100000000 };
+
+            let result = 0;
+            let temp = 0;
+            let lastNum = 0;
+
+            for (let i = 0; i < cleanText.length; i++) {
+                const char = cleanText[i];
+                const num = korMap[char];
+                if (num === undefined) continue;
+
+                if (unitMap[char]) {
+                    if (num >= 10000) {
+                        result += (temp + (lastNum || 1)) * num;
+                        temp = 0;
+                        lastNum = 0;
+                    } else {
+                        temp += (lastNum || 1) * num;
+                        lastNum = 0;
+                    }
+                } else {
+                    lastNum = num;
+                }
+            }
+            amount = result + temp + lastNum;
+        }
+
+        // 3. Fallback to raw digits
         if (amount === 0) {
             const raw = cleanText.replace(/[^0-9]/g, '');
             if (raw) amount = parseInt(raw);
@@ -169,13 +271,24 @@ window.kodaEngine = (() => {
             date: dateStr,
             type: category === '수입 합계' ? 'income' : 'expense',
             category: category,
-            label: text.split(/[0-9]|만|원/)[0].trim() || category,
+            label: text.split(/[0-9]|만|원/)[0].trim() || (amount === 0 ? text : category),
             amount: amount,
             status: '준비'
         };
     };
 
     const render = () => {
+        // Update User Header
+        if (state.currentUser) {
+            const statusIndicator = get('user-status-indicator');
+            const userIdDisplay = get('logged-in-user-id');
+            if (statusIndicator) statusIndicator.style.display = 'block';
+            if (userIdDisplay) userIdDisplay.innerText = state.currentUser.email.split('@')[0];
+        } else {
+            const statusIndicator = get('user-status-indicator');
+            if (statusIndicator) statusIndicator.style.display = 'none';
+        }
+
         const list = get('history-list-mvp');
         if (!list) return;
         const filtered = state.records.slice(0, 10);
@@ -229,12 +342,9 @@ window.kodaEngine = (() => {
 
         try {
             const email = id.includes('@') ? id : `${id}@coda-tax.com`;
-            const userCredential = await createUserWithEmailAndPassword(auth, email, pw);
-
-            // On Success: Show the Dedicated Success Screen
+            await createUserWithEmailAndPassword(auth, email, pw);
             get('payment-view-success').style.display = 'none';
             get('payment-view-final-success').style.display = 'block';
-
             localStorage.setItem('yt_user_status', 'paid');
         } catch (err) {
             if (submitBtn) {
@@ -242,20 +352,16 @@ window.kodaEngine = (() => {
                 submitBtn.innerText = "시작하기";
                 submitBtn.style.opacity = "1";
             }
-
             console.error("Auth Error Detail:", err.code, err.message);
-
             let userMsg = "가입 오류가 발생했습니다. ";
             if (err.code === 'auth/configuration-not-found') {
-                userMsg = "Firebase 설정 오류: 'Email/Password' 인증을 활성화해 주세요. (관리자님, 딱 한번만 콘솔에서 설정을 켜주시면 됩니다!)";
+                userMsg = "Firebase 설정 오류: 'Email/Password' 인증을 활성화해 주세요.";
             } else if (err.code === 'auth/email-already-in-use') {
                 userMsg = "이미 존재하는 아이디입니다.";
             } else if (err.code === 'auth/weak-password') {
                 userMsg = "비밀번호는 6자리 이상이어야 합니다.";
             } else if (err.code === 'auth/invalid-email') {
                 userMsg = "아이디 형식이 올바르지 않습니다.";
-            } else {
-                userMsg += `(${err.code})`;
             }
             alert("⚠️ " + userMsg);
         }
@@ -268,56 +374,226 @@ window.kodaEngine = (() => {
         if (!id || !pw) return;
         try {
             const email = id.includes('@') ? id : `${id}@coda-tax.com`;
-            await signInWithEmailAndPassword(auth, email, pw);
+            const result = await signInWithEmailAndPassword(auth, email, pw);
+            alert("로그인 성공! (UID: " + result.user.uid.slice(0, 5) + ")");
+            state.currentUser = result.user;
+            state.isAuthInitialized = true;
+            localStorage.setItem('yt_user_status', 'paid');
             navigate('/dashboard');
-        } catch (err) { alert("아이디 또는 비밀번호가 틀렸습니다."); }
+        } catch (err) {
+            console.error("Login Error:", err);
+            alert("로그인 오류: " + err.message);
+        }
+    };
+
+    const loginWithGoogle = async () => {
+        try {
+            const provider = new GoogleAuthProvider();
+            const result = await signInWithPopup(auth, provider);
+            if (result.user) {
+                // Update state immediately to prevent routing race
+                state.currentUser = result.user;
+                state.isAuthInitialized = true;
+                localStorage.setItem('yt_user_status', 'paid');
+                console.log("Google Login success - Redirecting...");
+                navigate('/dashboard');
+            }
+        } catch (error) {
+            console.error("Google Login Error Details:", error);
+            let msg = "구글 로그인 중 오류가 발생했습니다.";
+
+            // Common Firebase Auth errors
+            switch (error.code) {
+                case 'auth/popup-blocked':
+                    msg = "⚠️ 브라우저 팝업이 차단되었습니다. 주소창 옆의 팝업 허용 버튼을 눌러주세요.";
+                    break;
+                case 'auth/popup-closed-by-user':
+                    return; // No alert needed if user closed it
+                case 'auth/cancelled-popup-request':
+                    return;
+                case 'auth/unauthorized-domain':
+                    msg = "⚠️ 현재 도메인이 승인되지 않았습니다. Firebase 콘솔에서 도메인을 추가해주세요.";
+                    break;
+                case 'auth/network-request-failed':
+                    msg = "⚠️ 네트워크 연결이 불안정합니다. 인터넷 연결을 확인해주세요.";
+                    break;
+                case 'auth/internal-error':
+                    msg = "⚠️ 서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
+                    break;
+                default:
+                    msg += `\n코드: ${error.code}\n메시지: ${error.message}`;
+            }
+            alert(msg);
+        }
+    };
+
+    const requestKakaoPay = () => {
+        const { IMP } = window;
+        if (!IMP) {
+            alert("결제 모듈 로드 중입니다.");
+            return;
+        }
+        IMP.init(state.portoneId);
+        IMP.request_pay({
+            pg: "kakaopay.TC0ONETIME",
+            pay_method: "card",
+            merchant_uid: "merchant_" + new Date().getTime(),
+            name: "세무정석 프리미엄 멤버십",
+            amount: 5900,
+            buyer_email: "test@example.com",
+            buyer_name: "테스트유저",
+            buyer_tel: "010-1234-5678",
+        }, (rsp) => {
+            if (rsp.success) {
+                get('payment-view-initial').style.display = 'none';
+                get('payment-view-success').style.display = 'block';
+            } else {
+                alert("결제에 실패했습니다: " + rsp.error_msg);
+            }
+        });
     };
 
     return {
         init,
+        requestKakaoPay,
+        finalizeSignUp,
+        login,
+        logout: async () => {
+            if (confirm("로그아웃 하시겠습니까?")) {
+                try {
+                    await signOut(auth);
+                    localStorage.removeItem('yt_user_status');
+                    // Force a hard reload to clear all states and redirect to landing
+                    window.location.href = window.location.pathname + '#/';
+                    window.location.reload();
+                } catch (e) {
+                    console.error("Logout error:", e);
+                    alert("로그아웃 중 오류가 발생했습니다.");
+                }
+            }
+        },
+        navigate,
+        tryStartService: () => {
+            get('payment-view-initial').style.display = 'block';
+            get('payment-view-success').style.display = 'none';
+            get('payment-view-final-success').style.display = 'none';
+            get('payment-modal').style.display = 'flex';
+        },
         startVoiceRecord: () => {
+            console.log("startVoiceRecord clicked");
+
+            // Check for HTTPS (Web Speech API requirement)
+            if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+                alert("⚠️ 음성 기록은 보안 연결(HTTPS)에서만 작동합니다.\n현재: " + location.protocol);
+            }
+
+            const modal = get('voice-modal');
+            if (!modal) {
+                alert("오류: 음성 모달 요소를 찾을 수 없습니다.");
+                return;
+            }
+
             get('voice-transcribed-text').innerText = "";
             get('voice-result-box').style.display = 'none';
-            get('voice-modal').style.display = 'flex';
-            if (state.recognition) state.recognition.start();
+            get('voice-status-text').innerText = "마이크 초기화 중...";
+            modal.style.display = 'flex';
+
+            // Re-check or Re-init SpeechRecognition
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!state.recognition && SpeechRecognition) {
+                console.log("Lazy initializing SpeechRecognition...");
+                state.recognition = new SpeechRecognition();
+                state.recognition.continuous = false;
+                state.recognition.interimResults = true;
+                state.recognition.lang = 'ko-KR';
+                // (Re-attach listeners if needed, but for now we rely on the one in init if it worked)
+                // To be safe, let's re-attach a simplified version if it was missing
+                state.recognition.onresult = (event) => {
+                    let interim = '', final = '';
+                    for (let i = event.resultIndex; i < event.results.length; ++i) {
+                        if (event.results[i].isFinal) final += event.results[i][0].transcript;
+                        else interim += event.results[i][0].transcript;
+                    }
+                    get('voice-transcribed-text').innerText = final || interim;
+                    if (final) {
+                        state.lastDetected = parseVoiceText(final);
+                        get('voice-status-text').innerText = "인식 성공! ✅";
+                        get('voice-result-box').style.display = 'block';
+                    }
+                };
+                state.recognition.onerror = (e) => alert("인식 오류: " + e.error);
+            }
+
+            if (state.recognition) {
+                try {
+                    console.log("Calling recognition.start()...");
+                    state.recognition.start();
+                } catch (e) {
+                    console.error("Recognition Start Error:", e);
+                    if (e.name === 'InvalidStateError') {
+                        // Already started - try stopping and starting again
+                        console.log("InvalidStateError: Attempting restart...");
+                        state.recognition.stop();
+                        setTimeout(() => state.recognition.start(), 100);
+                    } else {
+                        alert("마이크 시작 오류: " + e.message);
+                    }
+                }
+            } else {
+                alert("이 브라우저나 기기에서는 음성 인식을 지원하지 않습니다.");
+            }
+        },
+        confirmVoiceEntry: async () => {
+            if (!state.lastDetected) {
+                alert("인식된 내용이 없습니다.");
+                return;
+            }
+            if (!state.currentUser) {
+                alert("로그인 정보가 없습니다. 다시 로그인해 주세요.");
+                navigate('/');
+                return;
+            }
+            const saveBtn = document.querySelector('#voice-result-box .btn-primary');
+            if (saveBtn) {
+                saveBtn.disabled = true;
+                saveBtn.innerText = "저장 중...";
+            }
+            try {
+                await addDoc(collection(db, "users", state.currentUser.uid, "records"), state.lastDetected);
+                showToast("내역이 저장되었습니다! 🎉");
+                get('voice-modal').style.display = 'none';
+                state.lastDetected = null;
+                if (saveBtn) {
+                    saveBtn.disabled = false;
+                    saveBtn.innerText = "저장하기";
+                }
+            } catch (e) {
+                console.error("Firestore Save Error:", e);
+                showToast("저장 실패: 권한 또는 연결 오류", "error");
+                if (saveBtn) {
+                    saveBtn.disabled = false;
+                    saveBtn.innerText = "저장하기";
+                }
+            }
+        },
+        cancelVoiceModal: () => {
+            state.lastDetected = null;
+            get('voice-modal').style.display = 'none';
+            get('voice-transcribed-text').innerText = "";
+            get('voice-result-box').style.display = 'none';
+            get('voice-status-text').innerText = "듣고 있습니다...";
         },
         clearVoiceTranscript: () => {
             if (state.recognition) state.recognition.start();
         },
-        confirmVoiceEntry: async () => {
-            if (!state.lastDetected || !state.currentUser) return;
-            try {
-                await addDoc(collection(db, "users", state.currentUser.uid, "records"), state.lastDetected);
-                get('voice-modal').style.display = 'none';
-                state.lastDetected = null;
-            } catch (e) { alert("저장 실패"); }
-        },
-        deleteRecord: async (id) => {
-            if (confirm("정말 삭제하시겠습니까?")) {
-                await deleteDoc(doc(db, "users", state.currentUser.uid, "records", id));
-            }
-        },
-        showCardInput: () => {
-            get('payment-view-initial').style.display = 'none';
-            get('payment-view-card').style.display = 'block';
-            setupCardInputs();
-        },
-        confirmSubscription: () => {
-            get('payment-view-card').style.display = 'none';
-            get('payment-view-success').style.display = 'block';
-        },
-        finalizeSignUp,
-        login,
-        logout: () => signOut(auth),
-        tryStartService: () => {
-            get('payment-view-initial').style.display = 'block';
-            get('payment-view-card').style.display = 'none';
-            get('payment-view-success').style.display = 'none';
-            get('payment-modal').style.display = 'flex';
-        },
         openAddModal: () => get('edit-modal').style.display = 'flex',
         saveManualEntry: async (e) => {
-            e.preventDefault();
+            if (e) e.preventDefault();
+            if (!state.currentUser) {
+                alert("로그인 정보가 없습니다.");
+                navigate('/');
+                return;
+            }
             const rec = {
                 date: get('edit-date').value || new Date().toISOString().split('T')[0],
                 type: get('edit-type').value,
@@ -325,12 +601,26 @@ window.kodaEngine = (() => {
                 amount: parseInt(get('edit-amount').value) || 0,
                 status: '준비'
             };
-            await addDoc(collection(db, "users", state.currentUser.uid, "records"), rec);
-            get('edit-modal').style.display = 'none';
+            try {
+                await addDoc(collection(db, "users", state.currentUser.uid, "records"), rec);
+                get('edit-modal').style.display = 'none';
+            } catch (e) {
+                console.error("Manual Save Error:", e);
+                alert("저장 실패");
+            }
+        },
+        deleteRecord: async (id) => {
+            if (confirm("정말 삭제하시겠습니까?")) {
+                await deleteDoc(doc(db, "users", state.currentUser.uid, "records", id));
+            }
         },
         showYearlyCategorySummary: () => alert("상세 리포트 준비중입니다."),
         showPrevYearSummary: () => alert("전년도 세무 리포트 준비중입니다."),
         openHometax: () => window.open('https://www.hometax.go.kr', '_blank'),
-        navigate
+        loginWithGoogle
     };
 })();
+
+window.addEventListener('DOMContentLoaded', () => {
+    window.kodaEngine.init().catch(console.error);
+});
