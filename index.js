@@ -47,6 +47,7 @@ window.kodaEngine = (() => {
         pendingCategory: null,
         pendingYear: null,
         isAuthInitialized: false, // New flag
+        voiceTargetYear: null, // Track target year for voice entries
         portoneId: 'imp33124838' // Verified from user's V1 API tab
     };
 
@@ -119,7 +120,7 @@ window.kodaEngine = (() => {
     };
 
     const init = async () => {
-        console.log("유튜버 종합소득세 신고앱 시작 (v1031)");
+        console.log("유튜버 종합소득세 신고앱 시작 (v1032)");
 
         // v1028: Force hash to landing on cold load to prevent auto-redirect skip
         if (window.location.hash !== '#/') {
@@ -150,48 +151,7 @@ window.kodaEngine = (() => {
 
         window.addEventListener('hashchange', handleRouting);
 
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (SpeechRecognition) {
-            state.recognition = new SpeechRecognition();
-            state.recognition.continuous = false;
-            state.recognition.interimResults = true;
-            state.recognition.lang = 'ko-KR';
-            state.recognition.onresult = (event) => {
-                const voiceText = get('voice-transcribed-text');
-                const resultBox = get('voice-result-box');
-                const statusText = get('voice-status-text');
-                let interim = '', final = '';
-                for (let i = event.resultIndex; i < event.results.length; ++i) {
-                    if (event.results[i].isFinal) final += event.results[i][0].transcript;
-                    else interim += event.results[i][0].transcript;
-                }
-                if (voiceText) voiceText.innerText = final || interim;
-
-                // If we got a final transcript, parse it even if it's short
-                if (final) {
-                    console.log("Final Transcription Received:", final);
-                    state.lastDetected = parseVoiceText(final);
-                    if (statusText) statusText.innerText = "인식 성공! ✅";
-                    if (resultBox) resultBox.style.display = 'block';
-                } else if (interim) {
-                    if (statusText) statusText.innerText = "듣고 있습니다...";
-                }
-            };
-            state.recognition.onstart = () => {
-                console.log("Speech Recognition started");
-                const statusText = get('voice-status-text');
-                if (statusText) statusText.innerText = "듣고 있습니다... (연결됨)";
-            };
-            state.recognition.onerror = (event) => {
-                console.error("Speech Recognition Error:", event.error);
-                const statusText = get('voice-status-text');
-                if (statusText) statusText.innerText = "인식 오류: " + event.error;
-                // alert removed in v1025 for better UX
-            };
-            state.recognition.onend = () => {
-                console.log("Speech Recognition Ended");
-            };
-        }
+        // Moved Speech Recognition setup into startVoiceRecord to allow targetYear parameter
     };
 
     const parseAmountOnly = (text) => {
@@ -260,10 +220,8 @@ window.kodaEngine = (() => {
                 break;
             }
         }
-        const now = new Date();
-        const dateStr = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}`;
+        // Date is now handled by confirmVoiceEntry based on state.voiceTargetYear
         return {
-            date: dateStr,
             type: category === '수입 합계' ? 'income' : 'expense',
             category: category,
             label: text.split(/[0-9]|만|원/)[0].trim() || (amount === 0 ? text : category),
@@ -447,6 +405,148 @@ window.kodaEngine = (() => {
         });
     };
 
+    const startVoiceRecord = (targetYear = null) => {
+        // Check for HTTPS (Web Speech API requirement)
+        if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+            alert("⚠️ 음성 기록은 보안 연결(HTTPS)에서만 작동합니다.\n현재: " + location.protocol);
+            return;
+        }
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+            alert("이 브라우저나 기기에서는 음성 인식을 지원하지 않습니다.");
+            return;
+        }
+
+        state.voiceTargetYear = targetYear; // Store target year for saving later
+
+        const modal = get('voice-modal');
+        if (!modal) {
+            alert("오류: 음성 모달 요소를 찾을 수 없습니다.");
+            return;
+        }
+
+        get('voice-transcribed-text').innerText = "";
+        get('voice-result-box').style.display = 'none';
+        get('voice-status-text').innerText = "마이크 초기화 중...";
+        modal.style.display = 'flex';
+
+        if (!state.recognition) {
+            state.recognition = new SpeechRecognition();
+            state.recognition.continuous = false;
+            state.recognition.interimResults = true;
+            state.recognition.lang = 'ko-KR';
+            state.recognition.onresult = (event) => {
+                const voiceText = get('voice-transcribed-text');
+                const resultBox = get('voice-result-box');
+                const statusText = get('voice-status-text');
+                let interim = '', final = '';
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) final += event.results[i][0].transcript;
+                    else interim += event.results[i][0].transcript;
+                }
+                if (voiceText) voiceText.innerText = final || interim;
+
+                // If we got a final transcript, parse it even if it's short
+                if (final) {
+                    console.log("Final Transcription Received:", final);
+                    state.lastDetected = parseVoiceText(final);
+                    if (statusText) statusText.innerText = "인식 성공! ✅";
+                    if (resultBox) resultBox.style.display = 'block';
+                } else if (interim) {
+                    if (statusText) statusText.innerText = "듣고 있습니다...";
+                }
+            };
+            state.recognition.onstart = () => {
+                console.log("Speech Recognition started");
+                const statusText = get('voice-status-text');
+                if (statusText) statusText.innerText = "듣고 있습니다... (연결됨)";
+            };
+            state.recognition.onerror = (event) => {
+                console.error("Speech Recognition Error:", event.error);
+                const statusText = get('voice-status-text');
+                if (statusText) statusText.innerText = "인식 오류: " + event.error;
+                // alert removed in v1025 for better UX
+            };
+            state.recognition.onend = () => {
+                console.log("Speech Recognition Ended");
+            };
+        }
+
+        try {
+            console.log("Calling recognition.start()...");
+            state.recognition.start();
+        } catch (e) {
+            console.error("Recognition Start Error:", e);
+            // If already started, just ignore or re-sync UI
+            if (e.name !== 'InvalidStateError') {
+                alert("마이크 시작 오류: " + e.message);
+            }
+        }
+    };
+
+    const confirmVoiceEntry = async () => {
+        if (!state.lastDetected) {
+            alert("인식된 내용이 없습니다.");
+            return;
+        }
+        if (!state.currentUser) {
+            alert("로그인 정보가 없습니다. 다시 로그인해 주세요.");
+            navigate('/');
+            return;
+        }
+        const saveBtn = document.querySelector('#voice-result-box .btn-primary');
+        if (saveBtn) {
+            saveBtn.disabled = true;
+            saveBtn.innerText = "저장 중...";
+        }
+        try {
+            // OPTIMISTIC CLOSURE
+            const recordToSave = { ...state.lastDetected };
+            const now = new Date();
+            // If target year is specified (e.g., 2025), use a date in that year
+            recordToSave.date = state.voiceTargetYear
+                ? `${state.voiceTargetYear}-12-31`
+                : now.toISOString().split('T')[0];
+
+            get('voice-modal').style.display = 'none';
+            state.lastDetected = null;
+            state.voiceTargetYear = null; // Clear target year after saving
+            if (saveBtn) {
+                saveBtn.disabled = false;
+                saveBtn.innerText = "저장하기";
+            }
+
+            // Ensure recognition is stopped when saving
+            if (state.recognition) {
+                try { state.recognition.stop(); } catch (e) { }
+            }
+
+            const savePromise = addDoc(collection(db, "users", state.currentUser.uid, "records"), recordToSave);
+            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Firestore Timeout (20s)")), 20000));
+
+            const docRef = await Promise.race([savePromise, timeoutPromise]);
+            console.log("Firestore Save Success - ID:", docRef.id);
+            showToast("심어두기가 완료되었습니다! 🎉");
+        } catch (e) {
+            console.error("Firestore Save Error/Timeout:", e);
+            // "Response delayed" toast removed in v1025 as it causes anxiety.
+        }
+    };
+
+    const cancelVoiceModal = () => {
+        console.log("cancelVoiceModal clicked");
+        if (state.recognition) {
+            try { state.recognition.stop(); } catch (e) { }
+        }
+        state.lastDetected = null;
+        state.voiceTargetYear = null; // Clear target year on cancel
+        get('voice-modal').style.display = 'none';
+        get('voice-transcribed-text').innerText = "";
+        get('voice-result-box').style.display = 'none';
+        get('voice-status-text').innerText = "듣고 있습니다...";
+    };
+
     return {
         init,
         requestKakaoPay,
@@ -472,92 +572,9 @@ window.kodaEngine = (() => {
             get('payment-view-final-success').style.display = 'none';
             get('payment-modal').style.display = 'flex';
         },
-        startVoiceRecord: () => {
-            console.log("startVoiceRecord clicked");
-
-            // Check for HTTPS (Web Speech API requirement)
-            if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
-                alert("⚠️ 음성 기록은 보안 연결(HTTPS)에서만 작동합니다.\n현재: " + location.protocol);
-            }
-
-            const modal = get('voice-modal');
-            if (!modal) {
-                alert("오류: 음성 모달 요소를 찾을 수 없습니다.");
-                return;
-            }
-
-            get('voice-transcribed-text').innerText = "";
-            get('voice-result-box').style.display = 'none';
-            get('voice-status-text').innerText = "마이크 초기화 중...";
-            modal.style.display = 'flex';
-
-            if (state.recognition) {
-                try {
-                    console.log("Calling recognition.start()...");
-                    state.recognition.start();
-                } catch (e) {
-                    console.error("Recognition Start Error:", e);
-                    // If already started, just ignore or re-sync UI
-                    if (e.name !== 'InvalidStateError') {
-                        alert("마이크 시작 오류: " + e.message);
-                    }
-                }
-            } else {
-                alert("이 브라우저나 기기에서는 음성 인식을 지원하지 않습니다.");
-            }
-        },
-        confirmVoiceEntry: async () => {
-            if (!state.lastDetected) {
-                alert("인식된 내용이 없습니다.");
-                return;
-            }
-            if (!state.currentUser) {
-                alert("로그인 정보가 없습니다. 다시 로그인해 주세요.");
-                navigate('/');
-                return;
-            }
-            const saveBtn = document.querySelector('#voice-result-box .btn-primary');
-            if (saveBtn) {
-                saveBtn.disabled = true;
-                saveBtn.innerText = "저장 중...";
-            }
-            try {
-                // OPTIMISTIC CLOSURE
-                const recordToSave = { ...state.lastDetected };
-                get('voice-modal').style.display = 'none';
-                state.lastDetected = null;
-                if (saveBtn) {
-                    saveBtn.disabled = false;
-                    saveBtn.innerText = "저장하기";
-                }
-
-                // Ensure recognition is stopped when saving
-                if (state.recognition) {
-                    try { state.recognition.stop(); } catch (e) { }
-                }
-
-                const savePromise = addDoc(collection(db, "users", state.currentUser.uid, "records"), recordToSave);
-                const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Firestore Timeout (20s)")), 20000));
-
-                const docRef = await Promise.race([savePromise, timeoutPromise]);
-                console.log("Firestore Save Success - ID:", docRef.id);
-                showToast("심어두기가 완료되었습니다! 🎉");
-            } catch (e) {
-                console.error("Firestore Save Error/Timeout:", e);
-                // "Response delayed" toast removed in v1025 as it causes anxiety.
-            }
-        },
-        cancelVoiceModal: () => {
-            console.log("cancelVoiceModal clicked");
-            if (state.recognition) {
-                try { state.recognition.stop(); } catch (e) { }
-            }
-            state.lastDetected = null;
-            get('voice-modal').style.display = 'none';
-            get('voice-transcribed-text').innerText = "";
-            get('voice-result-box').style.display = 'none';
-            get('voice-status-text').innerText = "듣고 있습니다...";
-        },
+        startVoiceRecord, // Now a standalone function
+        confirmVoiceEntry, // Now a standalone function
+        cancelVoiceModal, // Now a standalone function
         clearVoiceTranscript: () => {
             if (state.recognition) state.recognition.start();
         },
@@ -623,42 +640,41 @@ window.kodaEngine = (() => {
             const records2025 = state.records.filter(r => r.date && r.date.startsWith('2025-'));
             get('report-title').innerText = "2025년도 실적 내역";
 
-            if (records2025.length === 0) {
-                let html = `
-                    <div style="text-align:center; padding:1.5rem;">
-                        <div style="font-size:1.5rem; font-weight:800; color:var(--primary); margin-bottom:1.5rem;">💰 2025년 실적 데이터 미비</div>
-                        <div style="font-size:0.9rem; line-height:1.7; color:var(--text-muted); background:rgba(255,255,255,0.03); padding:1.5rem; border-radius:16px; text-align:left;">
-                            현재 2025년도로 표시된 기록이 없습니다.<br><br>
-                            종합소득세 신고를 위해 2025년도 내역이 필요하시다면,<br>
-                            '직접 입력'을 통해 날짜를 2025년으로 설정하여 기록해 주세요.
-                        </div>
-                    </div>
-                `;
-                get('report-content').innerHTML = html;
-            } else {
-                const categories = {};
-                records2025.forEach(r => {
-                    const label = (r.type === 'income') ? '유튜브 수입 (애드센스)' : (r.category || '기타비용');
-                    const box = (r.type === 'income') ? '매출' : '비용';
-                    if (!categories[label]) categories[label] = { amount: 0, box };
-                    categories[label].amount += (Number(r.amount) || 0);
-                });
+            const categories = {};
+            records2025.forEach(r => {
+                const label = (r.type === 'income') ? '유튜브 수입 (애드센스)' : (r.category || '기타비용');
+                const box = (r.type === 'income') ? '매출' : '비용';
+                if (!categories[label]) categories[label] = { amount: 0, box };
+                categories[label].amount += (Number(r.amount) || 0);
+            });
 
-                let html = '<div style="font-size:0.9rem;">';
-                html += '<div style="background:rgba(59,130,246,0.1); padding:12px; border-radius:12px; margin-bottom:15px; color:var(--primary); font-weight:700; text-align:center; font-size:1rem;">2025년 종합소득세 신고용 결산</div>';
+            let html = '<div style="font-size:0.9rem;">';
+            html += `
+                <div style="background:rgba(59,130,246,0.1); padding:20px; border-radius:16px; margin-bottom:20px; text-align:center;">
+                    <div style="font-size:0.8rem; color:var(--primary); margin-bottom:10px; font-weight:700;">🎤 2025년도 내역 항목별 입력</div>
+                    <button onclick="kodaEngine.startVoiceRecord('2025')"
+                        style="width:50px; height:50px; border-radius:50%; background:var(--primary); border:none; color:white; font-size:1.2rem; cursor:pointer; box-shadow:0 8px 16px rgba(59,130,246,0.3);">🎙️</button>
+                    <div style="margin-top:10px; font-size:0.75rem; color:var(--text-muted);">"2025년 교통비 20만원" 처럼 말씀해 주세요.</div>
+                </div>
+            `;
+            html += '<div style="background:rgba(255,255,255,0.05); padding:12px; border-radius:12px; margin-bottom:15px; color:var(--text-primary); font-weight:700; text-align:center; font-size:0.95rem;">2025년 종합소득세 신고용 결산</div>';
+
+            if (records2025.length === 0) {
+                html += '<div style="text-align:center; padding:2rem; color:var(--text-muted); font-size:0.85rem;">기록된 데이터가 없습니다.</div>';
+            } else {
                 for (const [label, data] of Object.entries(categories)) {
                     html += `
-                        <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border-color);">
+                        <div style="display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--border-color);">
                             <div>
                                 <span style="font-weight:700;">${label}</span>
-                                <span style="font-size:0.75rem; color:var(--text-muted);">${data.box}</span>
+                                <span style="font-size:0.75rem; color:var(--text-muted); display:block;">${data.box}</span>
                             </div>
                             <span style="font-weight:700;">${formatCurrency(data.amount)}원</span>
                         </div>`;
                 }
-                html += '</div>';
-                get('report-content').innerHTML = html;
             }
+            html += '</div>';
+            get('report-content').innerHTML = html;
             get('report-modal').style.display = 'flex';
         },
         closeReportModal: () => {
