@@ -121,7 +121,7 @@ window.kodaEngine = (() => {
     };
 
     const init = async () => {
-        console.log("세무정석 엔진 시작 (v1025)");
+        console.log("세무정석 엔진 시작 (v1026)");
         onAuthStateChanged(auth, (user) => {
             console.log("onAuthStateChanged:", user ? user.email : 'no user');
             state.currentUser = user;
@@ -658,6 +658,9 @@ window.kodaEngine = (() => {
             get('report-title').innerText = "종합 세무 분석 리포트";
             get('report-content').innerHTML = html;
             get('report-modal').style.display = 'flex';
+        },
+        closeReportModal: () => {
+            get('report-modal').style.display = 'none';
         },
         openHometax: () => window.open('https://www.hometax.go.kr', '_blank'),
         loginWithGoogle
