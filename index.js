@@ -119,7 +119,7 @@ window.kodaEngine = (() => {
     };
 
     const init = async () => {
-        console.log("세무정석 엔진 시작 (v1030)");
+        console.log("유튜버 종합소득세 신고앱 시작 (v1031)");
 
         // v1028: Force hash to landing on cold load to prevent auto-redirect skip
         if (window.location.hash !== '#/') {
@@ -615,13 +615,13 @@ window.kodaEngine = (() => {
             }
             html += '</div>';
 
-            get('report-title').innerText = "올해 실적 상세 리포트";
+            get('report-title').innerText = "올해 실적";
             get('report-content').innerHTML = html || "데이터가 없습니다.";
             get('report-modal').style.display = 'flex';
         },
         showPrevYearSummary: () => {
             const records2025 = state.records.filter(r => r.date && r.date.startsWith('2025-'));
-            get('report-title').innerText = "2025년도 세무 분석 리포트";
+            get('report-title').innerText = "2025년도 실적 내역";
 
             if (records2025.length === 0) {
                 let html = `
@@ -645,7 +645,7 @@ window.kodaEngine = (() => {
                 });
 
                 let html = '<div style="font-size:0.9rem;">';
-                html += '<div style="background:rgba(59,130,246,0.1); padding:12px; border-radius:12px; margin-bottom:15px; color:var(--primary); font-weight:700; text-align:center; font-size:1rem;">2025년 총 결산 완료</div>';
+                html += '<div style="background:rgba(59,130,246,0.1); padding:12px; border-radius:12px; margin-bottom:15px; color:var(--primary); font-weight:700; text-align:center; font-size:1rem;">2025년 종합소득세 신고용 결산</div>';
                 for (const [label, data] of Object.entries(categories)) {
                     html += `
                         <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border-color);">
