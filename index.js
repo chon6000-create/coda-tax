@@ -136,7 +136,7 @@ window.kodaEngine = (() => {
     };
 
     const init = async () => {
-        alert("세무정석 엔진 시작 (v1020 - Force)");
+        alert("세무정석 엔진 시작 (v1021 - Stable)");
         onAuthStateChanged(auth, (user) => {
             console.log("onAuthStateChanged:", user ? user.email : 'no user');
             state.currentUser = user;
@@ -176,10 +176,15 @@ window.kodaEngine = (() => {
                     else interim += event.results[i][0].transcript;
                 }
                 if (voiceText) voiceText.innerText = final || interim;
+
+                // If we got a final transcript, parse it even if it's short
                 if (final) {
+                    console.log("Final Transcription Received:", final);
                     state.lastDetected = parseVoiceText(final);
                     if (statusText) statusText.innerText = "인식 성공! ✅";
                     if (resultBox) resultBox.style.display = 'block';
+                } else if (interim) {
+                    if (statusText) statusText.innerText = "듣고 있습니다...";
                 }
             };
             state.recognition.onstart = () => {
@@ -498,44 +503,14 @@ window.kodaEngine = (() => {
             get('voice-status-text').innerText = "마이크 초기화 중...";
             modal.style.display = 'flex';
 
-            // Re-check or Re-init SpeechRecognition
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!state.recognition && SpeechRecognition) {
-                console.log("Lazy initializing SpeechRecognition...");
-                state.recognition = new SpeechRecognition();
-                state.recognition.continuous = false;
-                state.recognition.interimResults = true;
-                state.recognition.lang = 'ko-KR';
-                // (Re-attach listeners if needed, but for now we rely on the one in init if it worked)
-                // To be safe, let's re-attach a simplified version if it was missing
-                state.recognition.onresult = (event) => {
-                    let interim = '', final = '';
-                    for (let i = event.resultIndex; i < event.results.length; ++i) {
-                        if (event.results[i].isFinal) final += event.results[i][0].transcript;
-                        else interim += event.results[i][0].transcript;
-                    }
-                    get('voice-transcribed-text').innerText = final || interim;
-                    if (final) {
-                        state.lastDetected = parseVoiceText(final);
-                        get('voice-status-text').innerText = "인식 성공! ✅";
-                        get('voice-result-box').style.display = 'block';
-                    }
-                };
-                state.recognition.onerror = (e) => alert("인식 오류: " + e.error);
-            }
-
             if (state.recognition) {
                 try {
                     console.log("Calling recognition.start()...");
                     state.recognition.start();
                 } catch (e) {
                     console.error("Recognition Start Error:", e);
-                    if (e.name === 'InvalidStateError') {
-                        // Already started - try stopping and starting again
-                        console.log("InvalidStateError: Attempting restart...");
-                        state.recognition.stop();
-                        setTimeout(() => state.recognition.start(), 100);
-                    } else {
+                    // If already started, just ignore or re-sync UI
+                    if (e.name !== 'InvalidStateError') {
                         alert("마이크 시작 오류: " + e.message);
                     }
                 }
@@ -559,9 +534,9 @@ window.kodaEngine = (() => {
                 saveBtn.innerText = "저장 중...";
             }
             try {
-                alert("디버그: Firestore 저장 시도 시작 (v1020)");
+                alert("디버그: Firestore 저장 시도 시작 (v1021)");
 
-                // OPTIMISTIC CLOSURE: Close modal immediately to prevent "Saving..." hang UI
+                // OPTIMISTIC CLOSURE
                 const recordToSave = { ...state.lastDetected };
                 get('voice-modal').style.display = 'none';
                 state.lastDetected = null;
@@ -570,7 +545,11 @@ window.kodaEngine = (() => {
                     saveBtn.innerText = "저장하기";
                 }
 
-                // Add with timeout guard
+                // Ensure recognition is stopped when saving
+                if (state.recognition) {
+                    try { state.recognition.stop(); } catch (e) { }
+                }
+
                 const savePromise = addDoc(collection(db, "users", state.currentUser.uid, "records"), recordToSave);
                 const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Firestore Timeout (10s)")), 10000));
 
@@ -579,11 +558,15 @@ window.kodaEngine = (() => {
                 showToast("내역이 저장되었습니다! 🎉");
             } catch (e) {
                 console.error("Firestore Save Error/Timeout:", e);
-                alert("저장 상태 확인 필요: " + e.message + "\n(데이터가 이미 서버에 전송되었을 수 있습니다)");
+                alert("저장 응답 지연: " + e.message + "\n(데이터는 이미 서버에 전송되었을 수 있습니다)");
                 showToast("저장 상태 불확실", "error");
             }
         },
         cancelVoiceModal: () => {
+            console.log("cancelVoiceModal clicked");
+            if (state.recognition) {
+                try { state.recognition.stop(); } catch (e) { }
+            }
             state.lastDetected = null;
             get('voice-modal').style.display = 'none';
             get('voice-transcribed-text').innerText = "";
