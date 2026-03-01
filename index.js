@@ -119,7 +119,7 @@ window.kodaEngine = (() => {
     };
 
     const init = async () => {
-        console.log("유튜버 종합소득세 신고앱 시작 (v1034)");
+        console.log("유튜버 종합소득세 신고앱 시작 (v1035)");
 
         // v1028: Force hash to landing on cold load to prevent auto-redirect skip
         if (window.location.hash !== '#/') {
@@ -516,7 +516,10 @@ window.kodaEngine = (() => {
             const recordToSave = { ...state.lastDetected };
             const now = new Date();
             // If target year is specified (e.g., 2025), use a date in that year
-            recordToSave.date = state.voiceTargetYear
+            // v1035: Fix date logic. Only use 12-31 if it's explicitly for a past year.
+            // If it's the current year or no target year, use today's date.
+            const isPastYear = state.voiceTargetYear && Number(state.voiceTargetYear) < state.currentYear;
+            recordToSave.date = isPastYear
                 ? `${state.voiceTargetYear}-12-31`
                 : now.toISOString().split('T')[0];
 
