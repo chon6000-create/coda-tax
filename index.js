@@ -47,6 +47,7 @@ window.kodaEngine = (() => {
         isAuthInitialized: false, // New flag
         voiceTargetYear: null, // Track target year for voice entries
         currentYear: new Date().getFullYear(), // Added for dynamic year handling
+        allRecords: [], // Initialize allRecords to avoid undefined
         portoneId: 'imp33124838' // Verified from user's V1 API tab
     };
 
@@ -119,7 +120,7 @@ window.kodaEngine = (() => {
     };
 
     const init = async () => {
-        console.log("유튜버 종합소득세 신고앱 시작 (v1035)");
+        console.log("유튜버 종합소득세 신고앱 시작 (v1036)");
 
         // v1028: Force hash to landing on cold load to prevent auto-redirect skip
         if (window.location.hash !== '#/') {
@@ -624,15 +625,18 @@ window.kodaEngine = (() => {
         showYearlyCategorySummary: () => {
             const currentYear = state.currentYear;
             const recordsCurrentYear = state.records.filter(r => r.date && r.date.startsWith(currentYear + '-'));
-            const categories = {};
+
+            // v1036: Aggregate by HomeTax Box
+            const boxGroups = {};
             recordsCurrentYear.forEach(r => {
                 const catId = r.category || '기타필요경비';
-                const label = r.label || catId;
-                const catMeta = state.categories.find(c => c.id === catId) || {};
-                const box = catMeta.box ? ` [${catMeta.box}]` : '';
+                const catMeta = state.categories.find(c => c.id === catId) || { id: '기타필요경비', box: '22' };
+                const box = catMeta.box || '22';
+                const boxInfo = hometaxInfo[box] || { label: '기타필요경비' };
+                const boxLabel = `[${box}] ${boxInfo.label}`;
 
-                if (!categories[label]) categories[label] = { amount: 0, box };
-                categories[label].amount += (Number(r.amount) || 0);
+                if (!boxGroups[boxLabel]) boxGroups[boxLabel] = 0;
+                boxGroups[boxLabel] += (Number(r.amount) || 0);
             });
 
             let html = '<div style="font-size:0.9rem;">';
@@ -649,14 +653,13 @@ window.kodaEngine = (() => {
             if (recordsCurrentYear.length === 0) {
                 html += '<div style="text-align:center; padding:2rem; color:var(--text-muted); font-size:0.85rem;">기록된 데이터가 없습니다.</div>';
             } else {
-                for (const [label, data] of Object.entries(categories)) {
+                // Sort boxGroups by box number
+                const sortedKeys = Object.keys(boxGroups).sort();
+                for (const label of sortedKeys) {
                     html += `
                         <div style="display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--border-color);">
-                            <div>
-                                <span style="font-weight:700;">${label}</span>
-                                <span style="font-size:0.75rem; color:var(--text-muted); display:block;">${data.box}</span>
-                            </div>
-                            <span style="font-weight:700;">${formatCurrency(data.amount)}원</span>
+                            <span style="font-weight:700;">${label}</span>
+                            <span style="font-weight:700;">${formatCurrency(boxGroups[label])}원</span>
                         </div>`;
                 }
             }
@@ -672,15 +675,24 @@ window.kodaEngine = (() => {
             const recordsPrevYear = (state.allRecords || state.records).filter(r => r.date && r.date.startsWith(prevYear + '-'));
             get('report-title').innerText = "전년도 실적";
 
-            const categories = {};
+            // v1036: Aggregate by HomeTax Box
+            const boxGroups = {};
             recordsPrevYear.forEach(r => {
                 const catId = r.category || '기타필요경비';
-                const catMeta = state.categories.find(c => c.id === catId) || {};
-                const label = r.label || catId;
-                const boxStr = catMeta.box ? ` [${catMeta.box}]` : '';
+                const catMeta = state.categories.find(c => c.id === catId) || { id: '기타필요경비', box: '22' };
+                const box = catMeta.box || '22';
 
-                if (!categories[label]) categories[label] = { amount: 0, box: boxStr };
-                categories[label].amount += (Number(r.amount) || 0);
+                // Special handling for Revenue
+                if (r.type === 'income') {
+                    const label = "[매출] 유튜브 수익";
+                    if (!boxGroups[label]) boxGroups[label] = 0;
+                    boxGroups[label] += (Number(r.amount) || 0);
+                } else {
+                    const boxInfo = hometaxInfo[box] || { label: '기타필요경비' };
+                    const boxLabel = `[${box}] ${boxInfo.label}`;
+                    if (!boxGroups[boxLabel]) boxGroups[boxLabel] = 0;
+                    boxGroups[boxLabel] += (Number(r.amount) || 0);
+                }
             });
 
             let html = '<div style="font-size:0.9rem;">';
@@ -697,14 +709,17 @@ window.kodaEngine = (() => {
             if (recordsPrevYear.length === 0) {
                 html += '<div style="text-align:center; padding:2rem; color:var(--text-muted); font-size:0.85rem;">기록된 데이터가 없습니다.</div>';
             } else {
-                for (const [label, data] of Object.entries(categories)) {
+                // Sort boxGroups
+                const sortedKeys = Object.keys(boxGroups).sort((a, b) => {
+                    if (a.includes('[매출]')) return -1;
+                    if (b.includes('[매출]')) return 1;
+                    return a.localeCompare(b);
+                });
+                for (const label of sortedKeys) {
                     html += `
                         <div style="display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--border-color);">
-                            <div>
-                                <span style="font-weight:700;">${label}</span>
-                                <span style="font-size:0.75rem; color:var(--text-muted); display:block;">${data.box}</span>
-                            </div>
-                            <span style="font-weight:700;">${formatCurrency(data.amount)}원</span>
+                            <span style="font-weight:700;">${label}</span>
+                            <span style="font-weight:700;">${formatCurrency(boxGroups[label])}원</span>
                         </div>`;
                 }
             }
