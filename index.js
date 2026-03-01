@@ -48,6 +48,7 @@ window.kodaEngine = (() => {
         voiceTargetYear: null, // Track target year for voice entries
         currentYear: new Date().getFullYear(), // Added for dynamic year handling
         allRecords: [], // Initialize allRecords to avoid undefined
+        activeReportType: null, // v1037: Track which report is open
         portoneId: 'imp33124838' // Verified from user's V1 API tab
     };
 
@@ -543,6 +544,13 @@ window.kodaEngine = (() => {
             const docRef = await Promise.race([savePromise, timeoutPromise]);
             console.log("Firestore Save Success - ID:", docRef.id);
             showToast("심어두기가 완료되었습니다! 🎉");
+
+            // v1037: If a report modal is open, refresh its content immediately
+            if (state.activeReportType === 'current') {
+                kodaEngine.showYearlyCategorySummary();
+            } else if (state.activeReportType === 'prev') {
+                kodaEngine.showPrevYearSummary();
+            }
         } catch (e) {
             console.error("Firestore Save Error/Timeout:", e);
             // "Response delayed" toast removed in v1025 as it causes anxiety.
@@ -623,6 +631,7 @@ window.kodaEngine = (() => {
             }
         },
         showYearlyCategorySummary: () => {
+            state.activeReportType = 'current'; // v1037
             const currentYear = state.currentYear;
             const recordsCurrentYear = state.records.filter(r => r.date && r.date.startsWith(currentYear + '-'));
 
@@ -670,6 +679,7 @@ window.kodaEngine = (() => {
             get('report-modal').style.display = 'flex';
         },
         showPrevYearSummary: () => {
+            state.activeReportType = 'prev'; // v1037
             const prevYear = state.currentYear - 1;
             // Use state.allRecords to filter for previous year since state.records is filtered for active year
             const recordsPrevYear = (state.allRecords || state.records).filter(r => r.date && r.date.startsWith(prevYear + '-'));
@@ -728,6 +738,7 @@ window.kodaEngine = (() => {
             get('report-modal').style.display = 'flex';
         },
         closeReportModal: () => {
+            state.activeReportType = null; // v1037
             get('report-modal').style.display = 'none';
         },
         openHometax: () => window.open('https://www.hometax.go.kr', '_blank'),
