@@ -6,9 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="google" content="notranslate">
     <script>
-        // NUCLEAR CACHE BUSTING - v1039
+        // NUCLEAR CACHE BUSTING - v1040
         (function () {
-            const VERSION = 'v1039';
+            const VERSION = 'v1040';
             if (localStorage.getItem('app_v') !== VERSION) {
                 console.log("Nuclear Reset to " + VERSION);
                 localStorage.clear();
@@ -23,7 +23,7 @@
         })();
     </script>
 
-    <title>유튜버 종합소득세 신고앱 - v1039</title>
+    <title>유튜버 종합소득세 신고앱 - v1040</title>
     <link rel="stylesheet" as="style" crossorigin
         href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
     <!-- Portone (Iamport) SDK -->
@@ -419,7 +419,7 @@
     <!-- 2. Main Dashboard -->
     <div id="app-container" class="app-container" style="display:none; padding: 20px; padding-bottom: 60px;">
         <div style="position:fixed; top:5px; right:5px; font-size:10px; color:rgba(255,255,255,0.1); z-index:10000;">
-            v1039</div>
+            v1040</div>
         <header style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
             <h1 style="font-size:1.2rem; font-weight:900; line-height:1.2;">유튜버<br>종합소득세 신고앱</h1>
             <div id="user-status-indicator" style="font-size:0.8rem; color:var(--text-muted);">
@@ -478,7 +478,7 @@
             <div
                 style="background:var(--card-bg); border-radius:20px; padding:1rem; border:1px solid rgba(255,255,255,0.05); font-size: 0.85rem;">
                 <div style="padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--text-muted);">
-                    앱 안정화 및 리포트 기능 고도화 완료 (v1039)
+                    앱 안정화 및 AI 뱅킹 프로세서 도입 완료 (v1040)
                 </div>
                 <div style="padding: 8px 0; color: var(--text-muted);">
                     세특/공강 내역 자동 분류 기능 도입 안내
@@ -616,6 +616,29 @@
             }
         }
     </style>
+    <!-- 9. Bulk Entry Modal (v1040) -->
+    <div id="bulk-modal" class="modal" style="display:none;">
+        <div class="modal-content" style="max-width:500px; width:90%;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+                <h3 style="font-size:1.1rem; font-weight:800;">데이터 한꺼번에 심기 🤖</h3>
+                <span class="close-modal" id="close-bulk-modal">&times;</span>
+            </div>
+
+            <div
+                style="background:rgba(59,130,246,0.1); padding:15px; border-radius:12px; margin-bottom:15px; font-size:0.85rem;">
+                <div style="font-weight:700; color:var(--primary); margin-bottom:5px;">💡 AI 활용 꿀팁</div>
+                카드/은행 내역을 복사해 제미나이(Gemini)에 붙여넣고 분석된 JSON 데이터를 아래에 입력해 주세요.
+                <button onclick="kodaEngine.copyGeminiPrompt()"
+                    style="margin-top:8px; border:none; background:var(--primary); color:white; padding:5px 10px; border-radius:5px; font-size:0.75rem; cursor:pointer;">프롬프트
+                    복사하기</button>
+            </div>
+
+            <textarea id="bulk-json-input" placeholder="여기에 결과를 붙여넣어 주세요..."
+                style="width:100%; height:200px; background:rgba(255,255,255,0.05); border:1px solid var(--border-color); color:white; padding:10px; border-radius:10px; font-size:0.8rem; font-family:monospace;"></textarea>
+
+            <button id="save-bulk-btn" class="btn-primary" style="margin-top:1.5rem; width:100%;">한꺼번에 저장하기</button>
+        </div>
+    </div>
 </body>
 
 </html>
