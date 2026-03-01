@@ -121,7 +121,7 @@ window.kodaEngine = (() => {
     };
 
     const init = async () => {
-        console.log("유튜버 종합소득세 신고앱 시작 (v1036)");
+        console.log("유튜버 종합소득세 신고앱 시작 (v1038)");
 
         // v1028: Force hash to landing on cold load to prevent auto-redirect skip
         if (window.location.hash !== '#/') {
@@ -145,8 +145,15 @@ window.kodaEngine = (() => {
                     const currentYear = state.currentYear.toString();
                     state.records = allRecords.filter(r => r.date && r.date.startsWith(currentYear + '-'));
                     state.allRecords = allRecords; // Keep reference for prev year report
-
                     render();
+
+                    // v1038: If a report modal is open, refresh its content immediately
+                    // This is much more reliable than calling it from confirmVoiceEntry
+                    if (state.activeReportType === 'current') {
+                        kodaEngine.showYearlyCategorySummary();
+                    } else if (state.activeReportType === 'prev') {
+                        kodaEngine.showPrevYearSummary();
+                    }
                 }, (err) => {
                     console.error("Firestore Snapshot Error:", err);
                 });
@@ -544,13 +551,7 @@ window.kodaEngine = (() => {
             const docRef = await Promise.race([savePromise, timeoutPromise]);
             console.log("Firestore Save Success - ID:", docRef.id);
             showToast("심어두기가 완료되었습니다! 🎉");
-
-            // v1037: If a report modal is open, refresh its content immediately
-            if (state.activeReportType === 'current') {
-                kodaEngine.showYearlyCategorySummary();
-            } else if (state.activeReportType === 'prev') {
-                kodaEngine.showPrevYearSummary();
-            }
+            // v1038: Manual refresh calls removed. onSnapshot listener handles it now.
         } catch (e) {
             console.error("Firestore Save Error/Timeout:", e);
             // "Response delayed" toast removed in v1025 as it causes anxiety.
