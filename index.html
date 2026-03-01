@@ -14,7 +14,7 @@
         })();
     </script>
 
-    <title>세무정석 v1046 - 유튜버 종합소득세 AI 장부</title>
+    <title>유튜버 종합소득세 신고앱 v1046</title>
     <!-- Use both CSS files to be safe, as they seem to contain critical premium styles -->
     <link rel="stylesheet" href="CODA_Refund_Style.css?v=1046">
     <link rel="stylesheet" href="SeomuFix.css?v=1046">
@@ -37,11 +37,11 @@
         <div class="welcome-card">
             <div class="welcome-header">
                 <div class="welcome-emoji">🤖</div>
-                <h1 class="welcome-title">세무정석 AI</h1>
-                <p class="welcome-description">유튜버를 위한 가장 똑똑한 세금 관리</p>
+                <h1 class="welcome-title">유튜버<br>종합소득세 신고앱</h1>
+                <p class="welcome-description">가장 똑똑하고 간편한 세금 관리</p>
             </div>
 
-            <div id="login-form-area">
+            <div id="login-form-area" style="margin-top:2rem;">
                 <form onsubmit="kodaEngine.login(event)" style="display:flex; flex-direction:column; gap:1.2rem;">
                     <input type="text" id="login-id" placeholder="아이디 (또는 이메일)" required
                         style="padding:1.2rem; border-radius:15px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); color:white;">
@@ -51,11 +51,13 @@
                         style="padding:1.2rem; font-weight:800; border-radius:15px;">시작하기</button>
                     <button type="button" class="btn-secondary" onclick="kodaEngine.loginWithGoogle()"
                         style="display:flex; align-items:center; justify-content:center; gap:0.5rem; padding:1.2rem; border-radius:15px;">
-                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/layout/google.svg" width="18">
+                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/layout/google.svg" width="18"
+                            onerror="this.src='https://www.google.com/favicon.ico'">
                         구글로 계속하기
                     </button>
                 </form>
-                <div class="welcome-footer">
+                <div class="welcome-footer"
+                    style="margin-top:2rem; border-top:1px solid rgba(255,255,255,0.05); padding-top:1.5rem;">
                     <p style="font-size:0.9rem; color:var(--text-muted);">
                         계정이 없으신가요? <a href="#" onclick="get('payment-modal').style.display='flex'"
                             style="color:var(--accent); font-weight:700;">가입하기</a>
@@ -128,7 +130,7 @@
             <div class="glass-card" style="padding:1.2rem; border-radius:20px; font-size:0.85rem;">
                 <div style="display:flex; align-items:center; gap:10px; color:var(--accent);">
                     <span>📢</span>
-                    <span>AI 요약 기반 간편 입력 모드 (v1046)</span>
+                    <span>AI 요약 기반 간편 입력 (v1046)</span>
                 </div>
             </div>
         </section>
@@ -149,7 +151,7 @@
             <div id="bulk-input-area">
                 <div class="bg-card-alt"
                     style="background:rgba(255,255,255,0.03); padding:1.5rem; border-radius:24px; margin-bottom:1.5rem;">
-                    <p class="guide-steps" style="margin-bottom:20px;">
+                    <p class="guide-steps" style="margin-bottom:20px; font-size:0.85rem; line-height:1.8;">
                         1. 아래 버튼으로 <b>AI 프롬프트</b>를 복사하세요.<br>
                         2. AI(ChatGPT/Gemini)에게 카드 내역 요약을 시키세요.<br>
                         3. 합계에서 <b>개인 지출을 뺀 최종 금액</b>을 음성으로 말씀하세요.
@@ -162,13 +164,13 @@
 
                 <div
                     style="background:rgba(239,68,68,0.1); padding:1.2rem; border-radius:20px; border:1px solid rgba(239,68,68,0.2); color:#f87171; font-size:0.8rem; margin-bottom:2rem; line-height:1.5;">
-                    ⚠️ <b>주의</b>: 식대, 사적 모임 등 업무 무관 지출은 본인이 직접 제외해야 합니다. 세무상 책임은 사용자 본인에게 있습니다.
+                    ⚠️ <b>주의</b>: 식대, 사적 모임 등 업무 무관 지출은 본인이 직접 제외해야 합니다. 세법상 책임은 사용자 본인에게 있습니다.
                 </div>
 
                 <div style="text-align:center;">
                     <button class="btn-giant-mic" onclick="kodaEngine.startVoiceRecord()"
                         style="width:100px; height:100px; margin:0 auto;">🎙️</button>
-                    <p style="margin-top:1rem; font-size:0.9rem; font-weight:600;">지금 바로 말씀하세요</p>
+                    <p style="margin-top:1rem; font-size:0.9rem; font-weight:600;">합계 금액을 말씀하세요</p>
                 </div>
             </div>
         </div>
