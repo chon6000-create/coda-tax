@@ -119,7 +119,7 @@ window.kodaEngine = (() => {
     };
 
     const init = async () => {
-        console.log("유튜버 종합소득세 신고앱 시작 (v1033)");
+        console.log("유튜버 종합소득세 신고앱 시작 (v1034)");
 
         // v1028: Force hash to landing on cold load to prevent auto-redirect skip
         if (window.location.hash !== '#/') {
@@ -137,7 +137,13 @@ window.kodaEngine = (() => {
                 const q = query(collection(db, "users", user.uid, "records"), orderBy("date", "desc"));
                 onSnapshot(q, (snap) => {
                     console.log("Firestore Snapshot received, count:", snap.docs.length);
-                    state.records = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                    const allRecords = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+                    // Dashboard filter: Only show current year records
+                    const currentYear = state.currentYear.toString();
+                    state.records = allRecords.filter(r => r.date && r.date.startsWith(currentYear + '-'));
+                    state.allRecords = allRecords; // Keep reference for prev year report
+
                     render();
                 }, (err) => {
                     console.error("Firestore Snapshot Error:", err);
@@ -213,13 +219,19 @@ window.kodaEngine = (() => {
         const amount = parseAmountOnly(text);
         let category = '기타필요경비';
         const lower = text.toLowerCase();
-        for (const cat of state.categories) {
-            if (cat.keywords.some(k => lower.includes(k))) {
-                category = cat.id;
-                break;
+
+        // Manual override for common "Rent" terms first
+        if (lower.includes('월세') || lower.includes('임대료')) {
+            category = '월세/임차료';
+        } else {
+            for (const cat of state.categories) {
+                if (cat.keywords.some(k => lower.includes(k))) {
+                    category = cat.id;
+                    break;
+                }
             }
         }
-        // Date is now handled by confirmVoiceEntry based on state.voiceTargetYear
+
         return {
             type: category === '수입 합계' ? 'income' : 'expense',
             category: category,
@@ -629,17 +641,17 @@ window.kodaEngine = (() => {
                     <div style="margin-top:10px; font-size:0.75rem; color:var(--text-muted);">"교통비 20만원" 처럼 말씀해 주세요.</div>
                 </div>
             `;
-            html += `<div style="background:rgba(255,255,255,0.05); padding:12px; border-radius:12px; margin-bottom:15px; color:var(--text-primary); font-weight:700; text-align:center; font-size:0.95rem;">${currentYear}년 종합소득세 신고용 결산</div>`;
+            html += `<div style="background:rgba(255,255,255,0.05); padding:12px; border-radius:12px; margin-bottom:15px; color:var(--text-primary); font-weight:700; text-align:center; font-size:0.95rem;">${currentYear}년 종합소득세 신고용</div>`;
 
             if (recordsCurrentYear.length === 0) {
                 html += '<div style="text-align:center; padding:2rem; color:var(--text-muted); font-size:0.85rem;">기록된 데이터가 없습니다.</div>';
             } else {
                 for (const [label, data] of Object.entries(categories)) {
                     html += `
-                        <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border-color);">
+                        <div style="display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--border-color);">
                             <div>
                                 <span style="font-weight:700;">${label}</span>
-                                <span style="font-size:0.75rem; color:var(--text-muted);">${data.box}</span>
+                                <span style="font-size:0.75rem; color:var(--text-muted); display:block;">${data.box}</span>
                             </div>
                             <span style="font-weight:700;">${formatCurrency(data.amount)}원</span>
                         </div>`;
@@ -653,14 +665,18 @@ window.kodaEngine = (() => {
         },
         showPrevYearSummary: () => {
             const prevYear = state.currentYear - 1;
-            const recordsPrevYear = state.records.filter(r => r.date && r.date.startsWith(prevYear + '-'));
+            // Use state.allRecords to filter for previous year since state.records is filtered for active year
+            const recordsPrevYear = (state.allRecords || state.records).filter(r => r.date && r.date.startsWith(prevYear + '-'));
             get('report-title').innerText = "전년도 실적";
 
             const categories = {};
             recordsPrevYear.forEach(r => {
-                const label = (r.type === 'income') ? '유튜브 수입 (애드센스)' : (r.category || '기타비용');
-                const box = (r.type === 'income') ? '매출' : '비용';
-                if (!categories[label]) categories[label] = { amount: 0, box };
+                const catId = r.category || '기타필요경비';
+                const catMeta = state.categories.find(c => c.id === catId) || {};
+                const label = r.label || catId;
+                const boxStr = catMeta.box ? ` [${catMeta.box}]` : '';
+
+                if (!categories[label]) categories[label] = { amount: 0, box: boxStr };
                 categories[label].amount += (Number(r.amount) || 0);
             });
 
@@ -673,7 +689,7 @@ window.kodaEngine = (() => {
                     <div style="margin-top:10px; font-size:0.75rem; color:var(--text-muted);">"교통비 20만원" 처럼 말씀해 주세요.</div>
                 </div>
             `;
-            html += `<div style="background:rgba(255,255,255,0.05); padding:12px; border-radius:12px; margin-bottom:15px; color:var(--text-primary); font-weight:700; text-align:center; font-size:0.95rem;">전년도(${prevYear}년) 종합소득세 신고용 결산</div>`;
+            html += `<div style="background:rgba(255,255,255,0.05); padding:12px; border-radius:12px; margin-bottom:15px; color:var(--text-primary); font-weight:700; text-align:center; font-size:0.95rem;">전년도(${prevYear}년) 종합소득세 신고용</div>`;
 
             if (recordsPrevYear.length === 0) {
                 html += '<div style="text-align:center; padding:2rem; color:var(--text-muted); font-size:0.85rem;">기록된 데이터가 없습니다.</div>';
