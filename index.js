@@ -121,7 +121,7 @@ window.kodaEngine = (() => {
     };
 
     const init = async () => {
-        console.log("유튜버 종합소득세 신고앱 시작 (v1040)");
+        console.log("유튜버 종합소득세 신고앱 시작 (v1041)");
 
         // v1028: Force hash to landing on cold load to prevent auto-redirect skip
         if (window.location.hash !== '#/') {
@@ -657,7 +657,8 @@ window.kodaEngine = (() => {
                 boxGroups[boxLabel] += (Number(r.amount) || 0);
             });
 
-            let html = '<div style="font-size:0.9rem;">';
+            let html = '<div style="font-size:0.9rem; position:relative;">';
+            html += `<div style="position:absolute; top:-40px; right:0; font-size:10px; opacity:0.3; color:white;">v1041</div>`;
             html += `
                 <div style="background:rgba(59,130,246,0.1); padding:20px; border-radius:16px; margin-bottom:20px; text-align:center;">
                     <div style="font-size:0.8rem; color:var(--primary); margin-bottom:10px; font-weight:700;">🎤 ${currentYear}년 내역 항목별 입력</div>
@@ -666,7 +667,9 @@ window.kodaEngine = (() => {
                     <div style="margin-top:10px; font-size:0.75rem; color:var(--text-muted);">"교통비 20만원" 처럼 말씀해 주세요.</div>
                     
                     <button onclick="kodaEngine.openBulkModal('${currentYear}')" 
-                        style="margin-top:15px; background:none; border:1px solid rgba(255,255,255,0.2); color:white; padding:8px 15px; border-radius:10px; font-size:0.8rem; cursor:pointer;">🤖 텍스트 일괄 입력</button>
+                        style="margin-top:15px; background:rgba(255,255,255,0.05); border:1px solid rgba(59,130,246,0.5); color:white; padding:8px 15px; border-radius:10px; font-size:0.8rem; cursor:pointer; display:flex; align-items:center; gap:8px; margin-left:auto; margin-right:auto;">
+                        <span style="font-size:1rem;">🤖</span> 텍스트 일괄 입력
+                    </button>
                 </div>
             `;
             html += `<div style="background:rgba(255,255,255,0.05); padding:12px; border-radius:12px; margin-bottom:15px; color:var(--text-primary); font-weight:700; text-align:center; font-size:0.95rem;">${currentYear}년 종합소득세 신고용</div>`;
@@ -717,7 +720,8 @@ window.kodaEngine = (() => {
                 }
             });
 
-            let html = '<div style="font-size:0.9rem;">';
+            let html = '<div style="font-size:0.9rem; position:relative;">';
+            html += `<div style="position:absolute; top:-40px; right:0; font-size:10px; opacity:0.3; color:white;">v1041</div>`;
             html += `
                 <div style="background:rgba(59,130,246,0.1); padding:20px; border-radius:16px; margin-bottom:20px; text-align:center;">
                     <div style="font-size:0.8rem; color:var(--primary); margin-bottom:10px; font-weight:700;">🎤 전년도(${prevYear}년) 내역 항목별 입력</div>
@@ -726,7 +730,9 @@ window.kodaEngine = (() => {
                     <div style="margin-top:10px; font-size:0.75rem; color:var(--text-muted);">"교통비 20만원" 처럼 말씀해 주세요.</div>
                     
                     <button onclick="kodaEngine.openBulkModal('${prevYear}')" 
-                        style="margin-top:15px; background:none; border:1px solid rgba(255,255,255,0.2); color:white; padding:8px 15px; border-radius:10px; font-size:0.8rem; cursor:pointer;">🤖 텍스트 일괄 입력</button>
+                        style="margin-top:15px; background:rgba(255,255,255,0.05); border:1px solid rgba(59,130,246,0.5); color:white; padding:8px 15px; border-radius:10px; font-size:0.8rem; cursor:pointer; display:flex; align-items:center; gap:8px; margin-left:auto; margin-right:auto;">
+                        <span style="font-size:1rem;">🤖</span> 텍스트 일괄 입력
+                    </button>
                 </div>
             `;
             html += `<div style="background:rgba(255,255,255,0.05); padding:12px; border-radius:12px; margin-bottom:15px; color:var(--text-primary); font-weight:700; text-align:center; font-size:0.95rem;">전년도(${prevYear}년) 종합소득세 신고용</div>`;
