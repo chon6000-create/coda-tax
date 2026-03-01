@@ -121,7 +121,7 @@ window.kodaEngine = (() => {
     };
 
     const init = async () => {
-        console.log("유튜버 종합소득세 신고앱 시작 (v1042)");
+        console.log("유튜버 종합소득세 신고앱 시작 (v1043)");
 
         // v1028: Force hash to landing on cold load to prevent auto-redirect skip
         if (window.location.hash !== '#/') {
@@ -504,7 +504,7 @@ window.kodaEngine = (() => {
             });
 
             let html = '<div style="font-size:0.9rem; position:relative;">';
-            html += `<div style="position:absolute; top:-40px; right:0; font-size:10px; opacity:0.3; color:white;">v1042</div>`;
+            html += `<div style="position:absolute; top:-40px; right:0; font-size:10px; opacity:0.3; color:white;">v1043</div>`;
             html += `
                 <div style="background:rgba(59,130,246,0.1); padding:20px; border-radius:16px; margin-bottom:20px; text-align:center;">
                     <div style="font-size:0.8rem; color:var(--primary); margin-bottom:10px; font-weight:700;">🎤 ${currentYear}년 내역 항목별 입력</div>
@@ -555,7 +555,7 @@ window.kodaEngine = (() => {
             });
 
             let html = '<div style="font-size:0.9rem; position:relative;">';
-            html += `<div style="position:absolute; top:-40px; right:0; font-size:10px; opacity:0.3; color:white;">v1042</div>`;
+            html += `<div style="position:absolute; top:-40px; right:0; font-size:10px; opacity:0.3; color:white;">v1043</div>`;
             html += `
                 <div style="background:rgba(59,130,246,0.1); padding:20px; border-radius:16px; margin-bottom:20px; text-align:center;">
                     <div style="font-size:0.8rem; color:var(--primary); margin-bottom:10px; font-weight:700;">🎤 전년도(${prevYear}년) 내역 항목별 입력</div>
@@ -588,30 +588,40 @@ window.kodaEngine = (() => {
         openHometax: () => window.open('https://www.hometax.go.kr', '_blank'),
         loginWithGoogle,
         openBulkModal: (year) => {
-            console.log("v1042: Opening Bulk Modal for year", year);
+            console.log("v1043: Opening Bulk Modal for year", year);
             state.voiceTargetYear = year;
-            get('bulk-modal').style.display = 'flex';
+            const modal = get('bulk-modal');
+            if (modal) {
+                modal.style.display = 'flex';
+                modal.style.zIndex = '999999';
+                modal.style.visibility = 'visible';
+                modal.style.opacity = '1';
+                console.log("v1043: Modal element found and display set to flex.");
+            } else {
+                console.error("v1043: Modal element NOT FOUND!");
+                alert("오류: 입력 창을 찾을 수 없습니다. (v1043)");
+            }
         },
         copyGeminiPrompt: () => {
             const year = state.voiceTargetYear || state.currentYear;
-            const prompt = `카드/은행 결제 내역 텍스트를 분석해서 아래 JSON 형식의 배열로만 답변해줘.
+            const prompt = `카드 / 은행 결제 내역 텍스트를 분석해서 아래 JSON 형식의 배열로만 답변해줘.
 
-분류 가이드 (CategoryID):
-- '식대': 식당, 카페, 편의점, 배달
-- '장비비': 카메라, 조명, 마이크, 컴퓨터, 렌즈
-- '소모품비': 배터리, 케이블, 메모리, 문구
-- '여비교통비': 택시, 버스, 지하철, 주유, 주차
-- '월세/임차료': 월세, 스튜디오 대관
-- '광고선전비': 광고비, 마케팅
-- '세금과공과': 공과금, 협회비
+분류 가이드(CategoryID):
+            - '식대': 식당, 카페, 편의점, 배달
+                - '장비비': 카메라, 조명, 마이크, 컴퓨터, 렌즈
+                    - '소모품비': 배터리, 케이블, 메모리, 문구
+                        - '여비교통비': 택시, 버스, 지하철, 주유, 주차
+                            - '월세/임차료': 월세, 스튜디오 대관
+                                - '광고선전비': 광고비, 마케팅
+                                    - '세금과공과': 공과금, 협회비
 
 JSON 형식 예시:
-[
-  {"date": "${year}-01-15", "label": "항목명", "category": "CategoryID", "amount": 50000},
-  {"date": "${year}-02-10", "label": "항목명", "category": "CategoryID", "amount": 120000}
-]
+            [
+                { "date": "${year}-01-15", "label": "항목명", "category": "CategoryID", "amount": 50000 },
+                { "date": "${year}-02-10", "label": "항목명", "category": "CategoryID", "amount": 120000 }
+            ]
 
-답변에는 JSON 코드 블록만 포함해야 해. 이제 내가 내역을 줄게:`;
+답변에는 JSON 코드 블록만 포함해야 해.이제 내가 내역을 줄게: `;
             navigator.clipboard.writeText(prompt);
             alert("제미나이에 붙여넣을 프롬프트가 복사되었습니다!");
         },
@@ -619,7 +629,7 @@ JSON 형식 예시:
             const input = get('bulk-json-input').value.trim();
             if (!input) return;
             try {
-                const data = JSON.parse(input.replace(/```json|```/g, '').trim());
+                const data = JSON.parse(input.replace(/```json | ```/g, '').trim());
                 for (const item of data) {
                     await addDoc(collection(db, "users", state.currentUser.uid, "records"), {
                         date: item.date,
