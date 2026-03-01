@@ -45,11 +45,11 @@ window.kodaEngine = (() => {
         lastDetected: null,
         recognition: null,
         isAuthInitialized: false, // New flag
-        voiceTargetYear: null, // Track target year for voice entries
-        currentYear: new Date().getFullYear(), // Added for dynamic year handling
-        allRecords: [], // Initialize allRecords to avoid undefined
-        activeReportType: null, // v1037: Track which report is open
-        portoneId: 'imp33124838' // Verified from user's V1 API tab
+        voiceTargetYear: null,
+        currentYear: new Date().getFullYear(),
+        allRecords: [],
+        activeReportType: null,
+        bulkSavedCount: 0 // v1040
     };
 
     const get = (id) => document.getElementById(id);
@@ -121,7 +121,7 @@ window.kodaEngine = (() => {
     };
 
     const init = async () => {
-        console.log("유튜버 종합소득세 신고앱 시작 (v1039)");
+        console.log("유튜버 종합소득세 신고앱 시작 (v1040)");
 
         // v1028: Force hash to landing on cold load to prevent auto-redirect skip
         if (window.location.hash !== '#/') {
@@ -229,9 +229,17 @@ window.kodaEngine = (() => {
         let category = '기타필요경비';
         const lower = text.toLowerCase();
 
-        // Manual override for common "Rent" terms first
-        if (lower.includes('월세') || lower.includes('임대료')) {
-            category = '월세/임차료';
+        // v1040: Greatly enhanced keywords for better HomeTax categorization
+        if (lower.includes("식비") || lower.includes("커피") || lower.includes("간식") || lower.includes("밥값") || lower.includes("식사")) {
+            category = "식비/접대비"; // Box 14/15
+        } else if (lower.includes("월세") || lower.includes("임대료") || lower.includes("자리세") || lower.includes("스튜디오")) {
+            category = "월세/임차료"; // Box 13
+        } else if (lower.includes("카메라") || lower.includes("조명") || lower.includes("마이크") || lower.includes("삼각대") || lower.includes("렌즈") || lower.includes("장비") || lower.includes("기기") || lower.includes("컴퓨터") || lower.includes("모니터")) {
+            category = "장비비"; // Box 22
+        } else if (lower.includes("기름") || lower.includes("주유") || lower.includes("택시") || lower.includes("버스") || lower.includes("지하철") || lower.includes("교통") || lower.includes("주차")) {
+            category = "여비교통비"; // Box 15/17
+        } else if (lower.includes("소모품") || lower.includes("배터리") || lower.includes("케이블") || lower.includes("메모리")) {
+            category = "소모품비"; // Box 22
         } else {
             for (const cat of state.categories) {
                 if (cat.keywords.some(k => lower.includes(k))) {
@@ -656,6 +664,9 @@ window.kodaEngine = (() => {
                     <button onclick="kodaEngine.startVoiceRecord('${currentYear}')"
                         style="width:50px; height:50px; border-radius:50%; background:var(--primary); border:none; color:white; font-size:1.2rem; cursor:pointer; box-shadow:0 8px 16px rgba(59,130,246,0.3);">🎙️</button>
                     <div style="margin-top:10px; font-size:0.75rem; color:var(--text-muted);">"교통비 20만원" 처럼 말씀해 주세요.</div>
+                    
+                    <button onclick="kodaEngine.openBulkModal('${currentYear}')" 
+                        style="margin-top:15px; background:none; border:1px solid rgba(255,255,255,0.2); color:white; padding:8px 15px; border-radius:10px; font-size:0.8rem; cursor:pointer;">🤖 텍스트 일괄 입력</button>
                 </div>
             `;
             html += `<div style="background:rgba(255,255,255,0.05); padding:12px; border-radius:12px; margin-bottom:15px; color:var(--text-primary); font-weight:700; text-align:center; font-size:0.95rem;">${currentYear}년 종합소득세 신고용</div>`;
@@ -713,6 +724,9 @@ window.kodaEngine = (() => {
                     <button onclick="kodaEngine.startVoiceRecord('${prevYear}')"
                         style="width:50px; height:50px; border-radius:50%; background:var(--primary); border:none; color:white; font-size:1.2rem; cursor:pointer; box-shadow:0 8px 16px rgba(59,130,246,0.3);">🎙️</button>
                     <div style="margin-top:10px; font-size:0.75rem; color:var(--text-muted);">"교통비 20만원" 처럼 말씀해 주세요.</div>
+                    
+                    <button onclick="kodaEngine.openBulkModal('${prevYear}')" 
+                        style="margin-top:15px; background:none; border:1px solid rgba(255,255,255,0.2); color:white; padding:8px 15px; border-radius:10px; font-size:0.8rem; cursor:pointer;">🤖 텍스트 일괄 입력</button>
                 </div>
             `;
             html += `<div style="background:rgba(255,255,255,0.05); padding:12px; border-radius:12px; margin-bottom:15px; color:var(--text-primary); font-weight:700; text-align:center; font-size:0.95rem;">전년도(${prevYear}년) 종합소득세 신고용</div>`;
@@ -743,10 +757,82 @@ window.kodaEngine = (() => {
             get('report-modal').style.display = 'none';
         },
         openHometax: () => window.open('https://www.hometax.go.kr', '_blank'),
-        loginWithGoogle
+        loginWithGoogle,
+        openBulkModal: (year) => {
+            state.voiceTargetYear = year;
+            const modal = get('bulk-modal');
+            if (modal) modal.style.display = 'flex';
+        },
+        copyGeminiPrompt: () => {
+            const year = state.voiceTargetYear || state.currentYear;
+            const prompt = `카드/은행 결제 내역 텍스트를 분석해서 아래 JSON 형식의 배열로만 답변해줘.
+
+분류 가이드 (CategoryID):
+- '식대': 식당, 카페, 편의점, 배달
+- '장비비': 카메라, 조명, 마이크, 컴퓨터, 렌즈
+- '소모품비': 배터리, 케이블, 메모리, 문구
+- '여비교통비': 택시, 버스, 지하철, 주유, 주차
+- '월세/임차료': 월세, 스튜디오 대관
+- '광고선전비': 광고비, 마케팅
+- '세금과공과': 공과금, 협회비
+
+JSON 형식 예시:
+[
+  {"date": "${year}-01-15", "label": "항목명", "category": "CategoryID", "amount": 50000},
+  {"date": "${year}-02-10", "label": "항목명", "category": "CategoryID", "amount": 120000}
+]
+
+답변에는 JSON 코드 블록만 포함해야 해. 이제 내가 내역을 줄게:`;
+            navigator.clipboard.writeText(prompt);
+            alert("제미나이에 붙여넣을 프롬프트가 복사되었습니다! 분석할 내역과 함께 제미나이에 전달해 주세요.");
+        },
+        saveBulkRecords: async () => {
+            const input = get('bulk-json-input').value.trim();
+            if (!input) return alert("데이터를 입력해 주세요.");
+            try {
+                const cleanJson = input.replace(/```json|```/g, '').trim();
+                const data = JSON.parse(cleanJson);
+                if (!Array.isArray(data)) throw new Error("배열 형식이 아닙니다.");
+
+                const btn = get('save-bulk-btn');
+                btn.disabled = true;
+                btn.innerText = "저장 중...";
+
+                let successCount = 0;
+                for (const item of data) {
+                    if (item.date && item.amount) {
+                        await addDoc(collection(db, "users", state.currentUser.uid, "records"), {
+                            date: item.date,
+                            label: item.label || "일괄 입력",
+                            category: item.category || "기타필요경비",
+                            amount: Number(item.amount),
+                            type: item.category === '수입 합계' ? 'income' : 'expense'
+                        });
+                        successCount++;
+                    }
+                }
+
+                showToast(`${successCount}개의 내역이 성공적으로 심어졌습니다! 🤖`);
+                get('bulk-modal').style.display = 'none';
+                get('bulk-json-input').value = "";
+                btn.disabled = false;
+                btn.innerText = "한꺼번에 저장하기";
+            } catch (e) {
+                console.error("Bulk Save Error:", e);
+                alert("데이터 형식이 올바르지 않습니다. 제미나이가 준 JSON 코드를 그대로 붙여넣었는지 확인해 주세요.");
+            }
+        }
     };
 })();
 
 window.addEventListener('DOMContentLoaded', () => {
     window.kodaEngine.init().catch(console.error);
+
+    // v1040 Event Listeners
+    document.getElementById('close-bulk-modal')?.addEventListener('click', () => {
+        document.getElementById('bulk-modal').style.display = 'none';
+    });
+    document.getElementById('save-bulk-btn')?.addEventListener('click', () => {
+        window.kodaEngine.saveBulkRecords();
+    });
 });
