@@ -121,7 +121,7 @@ window.kodaEngine = (() => {
     };
 
     const init = async () => {
-        console.log("유튜버 종합소득세 신고앱 시작 (v1038)");
+        console.log("유튜버 종합소득세 신고앱 시작 (v1039)");
 
         // v1028: Force hash to landing on cold load to prevent auto-redirect skip
         if (window.location.hash !== '#/') {
@@ -144,11 +144,11 @@ window.kodaEngine = (() => {
                     // Dashboard filter: Only show current year records
                     const currentYear = state.currentYear.toString();
                     state.records = allRecords.filter(r => r.date && r.date.startsWith(currentYear + '-'));
-                    state.allRecords = allRecords; // Keep reference for prev year report
+                    state.allRecords = allRecords; // v1039: Ensure this is set before re-rendering reports
+
                     render();
 
-                    // v1038: If a report modal is open, refresh its content immediately
-                    // This is much more reliable than calling it from confirmVoiceEntry
+                    // v1038/v1039: Trigger report refresh if modal is open
                     if (state.activeReportType === 'current') {
                         kodaEngine.showYearlyCategorySummary();
                     } else if (state.activeReportType === 'prev') {
