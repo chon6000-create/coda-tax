@@ -46,6 +46,25 @@
     max-width: 440px;
     text-align: center;
     box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.7);
+    position: relative;
+    /* For absolute close buttons if needed */
+}
+
+.modal-close-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border: none;
+    color: var(--text-muted);
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
 }
 
 body {
