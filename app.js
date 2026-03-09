@@ -23,10 +23,10 @@ window.kodaEngine = (() => {
     let state = {
         isSubscribed: false,
         currentUser: null,
-        records: [],
+        records: [], // current year records
         categories: [
             { id: '수입 합계', keywords: ['애드센스', '협찬', '수입', '입금', '광고수익', '도네', '후원', '정산'], type: 'income', box: '수입' },
-            { id: '식대', keywords: ['식대', '밥', '회식', '미팅', '커피', '편의점', '식사', '음식', '음식비', '외식', '식사비'], type: 'expense', box: '15' },
+            { id: '식대', keywords: ['식대', '밥', '회식', '미팅', '커피', '편의점', '식사', '음식', '음식비', '외식', '식사비', '10대'], type: 'expense', box: '15' },
             { id: '여비교통비', keywords: ['교통', '차비', '택시', '버스', '지하철', '주유', '기름', '톨게이트', '주차'], type: 'expense', box: '15' },
             { id: '촬영소품', keywords: ['소품', '배경', '의상', '분장', '액세서리', '가발'], type: 'expense', box: '11' },
             { id: '장비비', keywords: ['장비', '카메라', '마이크', '조명', '렌즈', '컴퓨터', 'PC', '모니터', '삼각대'], type: 'expense', box: '22' },
@@ -47,12 +47,13 @@ window.kodaEngine = (() => {
         recognition: null,
         isAuthInitialized: false,
         voiceTargetYear: null,
-        currentYear: 2026,
-        allRecords: [],
+        currentYear: new Date().getFullYear(),
+        allRecords: [], // cached all records from firebase
         activeReportType: null
     };
 
     const get = (id) => document.getElementById(id);
+    window.get = get; // 전역 스코프에서도 사용할 수 있게 노출
     const formatCurrency = (num) => new Intl.NumberFormat('ko-KR').format(Math.floor(num));
 
     const showToast = (msg, type = 'success') => {
@@ -119,7 +120,7 @@ window.kodaEngine = (() => {
         } else {
             historyList.innerHTML = filtered.map(r => `
                 <tr>
-                    <td class="cell-date">${r.date.slice(5).replace('-', '/')}</td>
+                    <td class="cell-date">${r.date ? r.date.slice(5).replace('-', '/') : ''}</td>
                     <td class="cell-type ${r.type}">${r.type === 'income' ? '수입' : '경비'}</td>
                     <td class="cell-cat">${r.label || r.category}</td>
                     <td class="cell-amt">${formatCurrency(r.amount)}원</td>
@@ -130,10 +131,10 @@ window.kodaEngine = (() => {
     };
 
     const init = async () => {
-        console.log("유튜버 종합소득세 신고앱 시작");
-        if (localStorage.getItem('app_v') !== 'final') {
-            localStorage.setItem('app_v', 'final');
-            console.log("App Reset");
+        console.log("유튜버 종합소득세 신고앱 시작 (Stabilized)");
+        if (localStorage.getItem('app_v') !== 'v1.2.0_final') {
+            localStorage.setItem('app_v', 'v1.2.0_final');
+            console.log("App Reset to v1.2.0 (New Labels)");
         }
         if (window.location.hash !== '#/') window.location.hash = '#/';
         onAuthStateChanged(auth, (user) => {
@@ -144,8 +145,11 @@ window.kodaEngine = (() => {
                 onSnapshot(q, (snap) => {
                     const allRecords = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                     state.allRecords = allRecords;
-                    state.records = allRecords.filter(r => r.date && r.date.startsWith(state.currentYear.toString() + '-'));
+                    // Current Year Filtering (Robust)
+                    state.records = allRecords.filter(r => r.date && typeof r.date === 'string' && r.date.startsWith(state.currentYear.toString() + '-'));
                     render();
+
+                    // Refresh report if open
                     if (state.activeReportType === 'current') window.kodaEngine.showYearlyCategorySummary();
                     else if (state.activeReportType === 'prev') window.kodaEngine.showPrevYearSummary();
                 });
@@ -227,14 +231,20 @@ window.kodaEngine = (() => {
         },
         logout: async () => { if (confirm("로그아웃?")) { await signOut(auth); window.location.reload(); } },
         startVoiceRecord: (targetYear = null) => {
+            console.log("음성 인식 시작 시도, 대상 연도:", targetYear);
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) {
-                alert("이 브라우저는 음성 인식을 지원하지 않습니다.");
+                alert("이 브라우저는 음성 인식을 지원하지 않습니다. 크롬 브라우저를 권장합니다.");
                 return;
             }
 
+            // 모달 초기화 및 표시 (인식 시작 전 수행)
             const modal = get('voice-modal');
-            if (modal) modal.style.display = 'flex';
+            if (modal) {
+                modal.style.display = 'flex';
+                // 강제 레이아웃 리플로우 유도
+                modal.offsetHeight;
+            }
 
             const statusText = get('voice-status-text');
             const textDisplay = get('voice-transcribed-text');
@@ -244,36 +254,59 @@ window.kodaEngine = (() => {
             if (textDisplay) textDisplay.innerText = "...";
             if (resultBox) resultBox.style.display = 'none';
 
+            // 타겟 연도 결정
             state.voiceTargetYear = targetYear || (state.activeReportType === 'prev' ? state.currentYear - 1 : state.currentYear);
 
             if (!state.recognition) {
                 state.recognition = new SpeechRecognition();
                 state.recognition.lang = 'ko-KR';
                 state.recognition.interimResults = true;
-                state.recognition.continuous = false;
+                state.recognition.continuous = true; // 끊기지 않게 연속 인식 활성화
 
                 state.recognition.onstart = () => {
                     if (statusText) statusText.innerText = "말씀해 주세요...";
                 };
 
                 state.recognition.onresult = (event) => {
-                    const text = event.results[event.results.length - 1][0].transcript;
-                    if (textDisplay) textDisplay.innerText = text;
-                    if (event.results[event.results.length - 1].isFinal) {
-                        state.lastDetected = parseVoiceText(text);
-                        if (resultBox) resultBox.style.display = 'block';
-                        if (statusText) statusText.innerText = "인식 완료!";
+                    let finalTranscript = '';
+                    let interimTranscript = '';
+
+                    for (let i = event.resultIndex; i < event.results.length; ++i) {
+                        if (event.results[i].isFinal) {
+                            finalTranscript += event.results[i][0].transcript;
+                        } else {
+                            interimTranscript += event.results[i][0].transcript;
+                        }
+                    }
+
+                    const currentText = finalTranscript || interimTranscript;
+                    if (textDisplay && currentText) textDisplay.innerText = currentText;
+
+                    if (finalTranscript) {
+                        state.lastDetected = parseVoiceText(finalTranscript);
+                        if (resultBox) {
+                            resultBox.style.display = 'block';
+                            // 버튼 노출 시 즉시 이벤트 리스너 재강제 바인딩 (먹통 방지)
+                            const ledgerBtn = resultBox.querySelector('button');
+                            if (ledgerBtn) {
+                                ledgerBtn.onclick = () => window.kodaEngine.confirmVoiceEntry();
+                            }
+                        }
+                        if (statusText) statusText.innerText = "인식 완료! (계속 말씀하셔도 됩니다)";
                     }
                 };
 
                 state.recognition.onend = () => {
+                    // continuous 모드에서는 명시적으로 stop()을 부르지 않으면 계속 실행될 수 있음
+                    // 하지만 브라우저 구현에 따라 자동으로 끝날 경우 재시작 로직이 필요할 수 있음
                     if (!state.lastDetected && statusText) {
-                        statusText.innerText = "다시 시도해 주세요.";
+                        statusText.innerText = "대기 중...";
                     }
                 };
 
                 state.recognition.onerror = (event) => {
                     if (statusText) statusText.innerText = `오류: ${event.error}`;
+                    console.error("Speech Recognition Error:", event.error);
                 };
             }
 
@@ -291,11 +324,29 @@ window.kodaEngine = (() => {
         closeVoiceModal,
         confirmVoiceEntry: async () => {
             if (!state.lastDetected) return;
-            const rec = { ...state.lastDetected };
-            rec.date = state.voiceTargetYear ? `${state.voiceTargetYear}-12-31` : new Date().toISOString().split('T')[0];
-            await addDoc(collection(db, "users", state.currentUser.uid, "records"), rec);
-            closeVoiceModal();
-            showToast("실적이 성공적으로 기록되었습니다! 🎉");
+            console.log("Confirming voice entry:", state.lastDetected);
+            const btn = document.querySelector('#voice-result-box button');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerText = "저장 중...";
+            }
+            try {
+                const rec = { ...state.lastDetected };
+                rec.date = state.voiceTargetYear ? `${state.voiceTargetYear}-12-31` : new Date().toISOString().split('T')[0];
+                console.log("Saving record to Firestore:", rec);
+                const docRef = await addDoc(collection(db, "users", state.currentUser.uid, "records"), rec);
+                console.log("Record saved with ID:", docRef.id);
+                closeVoiceModal();
+                showToast("실적이 성공적으로 기록되었습니다! 🎉");
+            } catch (e) {
+                console.error("Save Error:", e);
+                showToast("저장 중 오류가 발생했습니다.", "error");
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerText = "장부에 기록하기";
+                }
+            }
         },
         deleteRecord: async (id) => { if (confirm("삭제?")) await deleteDoc(doc(db, "users", state.currentUser.uid, "records", id)); },
         showYearlyCategorySummary: () => {
@@ -308,10 +359,17 @@ window.kodaEngine = (() => {
                 boxGroups[label] = (boxGroups[label] || 0) + Number(r.amount);
             });
             let html = '<div style="font-size:0.9rem; position:relative;">';
+            // 2026년 리포트에서는 AI 요약 가이드 버튼 제거 (사용자 요청 반영)
+            /*
             html += `<div style="background:rgba(59,130,246,0.1); padding:20px; border-radius:16px; margin-bottom:20px; text-align:center;">
                 <button onclick="kodaEngine.openBulkModal('${state.currentYear}')" class="btn-primary" style="padding:10px 20px; font-weight:700;">🤖 AI 요약 가이드 열기</button>
             </div>`;
-            Object.keys(boxGroups).forEach(k => { html += `<div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border-color);"><span>${k}</span><span>${formatCurrency(boxGroups[k])}원</span></div>`; });
+            */
+            if (Object.keys(boxGroups).length === 0) {
+                html += '<p style="text-align:center; padding:20px; opacity:0.5;">데이터가 없습니다.</p>';
+            } else {
+                Object.keys(boxGroups).forEach(k => { html += `<div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border-color);"><span>${k}</span><span>${formatCurrency(boxGroups[k])}원</span></div>`; });
+            }
             html += '</div>';
             get('report-title').innerText = `${state.currentYear}년 실적 (항목별)`;
             get('report-content').innerHTML = html;
@@ -319,8 +377,9 @@ window.kodaEngine = (() => {
         },
         showPrevYearSummary: () => {
             state.activeReportType = 'prev';
-            const py = 2025; // 전년도 고정
-            const records = state.allRecords.filter(r => r.date.startsWith(py + '-'));
+            const py = state.currentYear - 1;
+            // Robust Filtering for Previous Year Data
+            const records = state.allRecords.filter(r => r.date && typeof r.date === 'string' && r.date.startsWith(py + '-'));
             const boxGroups = {};
             records.forEach(r => {
                 const cat = state.categories.find(c => c.id === r.category) || { box: '22' };
@@ -329,12 +388,16 @@ window.kodaEngine = (() => {
             });
             let html = '<div style="font-size:0.9rem; position:relative;">';
             html += `<div style="background:rgba(59,130,246,0.1); padding:20px; border-radius:16px; margin-bottom:20px; text-align:center;">
-                <p style="font-size:0.8rem; margin-bottom:10px; color:var(--accent);">2025년 카드 내역 분석이 필요하신가요?</p>
-                <button onclick="kodaEngine.openBulkModal('2025')" class="btn-primary" style="padding:10px 20px; font-weight:700;">🤖 2025년 AI 요약 가이드</button>
+                <p style="font-size:0.8rem; margin-bottom:10px; color:var(--accent);">전년도 카드 내역 분석이 필요하신가요?</p>
+                <button onclick="kodaEngine.openBulkModal('${py}')" class="btn-primary" style="padding:10px 20px; font-weight:700;">🤖 전년도 AI 요약 가이드</button>
             </div>`;
-            Object.keys(boxGroups).forEach(k => { html += `<div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border-color);"><span>${k}</span><span>${formatCurrency(boxGroups[k])}원</span></div>`; });
+            if (Object.keys(boxGroups).length === 0) {
+                html += `<p style="text-align:center; padding:20px; opacity:0.5;">전년도(${py}년) 데이터가 없습니다.</p>`;
+            } else {
+                Object.keys(boxGroups).forEach(k => { html += `<div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border-color);"><span>${k}</span><span>${formatCurrency(boxGroups[k])}원</span></div>`; });
+            }
             html += '</div>';
-            get('report-title').innerText = `2025년 실적 (전년도)`;
+            get('report-title').innerText = `전년도 실적 (${py}년)`;
             get('report-content').innerHTML = html;
             get('report-modal').style.display = 'flex';
         },
@@ -344,6 +407,19 @@ window.kodaEngine = (() => {
         },
         openBulkModal: (year) => {
             state.voiceTargetYear = year;
+            const aiSection = get('ai-prompt-section');
+            const modalTitle = document.querySelector('#bulk-modal h2');
+            const modalDesc = document.querySelector('#bulk-modal p');
+
+            if (year == state.currentYear) {
+                if (aiSection) aiSection.style.display = 'none';
+                if (modalTitle) modalTitle.innerText = "간편 입력";
+                if (modalDesc) modalDesc.innerText = "사용자의 음성을 인식하여 장부에 기록합니다.";
+            } else {
+                if (aiSection) aiSection.style.display = 'block';
+                if (modalTitle) modalTitle.innerText = "AI 요약 및 간편 입력";
+                if (modalDesc) modalDesc.innerText = "AI를 활용해 복잡한 내역을 한 번에 정리하세요.";
+            }
             get('bulk-modal').style.display = 'flex';
             get('bulk-input-area').style.display = 'block';
         },
@@ -358,14 +434,27 @@ window.kodaEngine = (() => {
 window.addEventListener('DOMContentLoaded', () => {
     window.kodaEngine.init().catch(console.error);
 
-    document.querySelectorAll('[id^="close-"]').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const modalId = e.target.id.replace('close-', '');
-            const modal = document.getElementById(modalId + '-modal');
-            if (modal) modal.style.display = 'none';
+    // 모든 닫기 버튼 공통 처리 (ID 또는 Class 기반 강제 바인딩)
+    const setupModalClosers = () => {
+        document.querySelectorAll('.modal-close-btn, .btn-text-link, .modal-close').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const modal = btn.closest('.modal-overlay');
+                if (modal) modal.style.display = 'none';
+            });
         });
-    });
+    };
+    setupModalClosers();
 
-    get('close-report-modal')?.addEventListener('click', () => window.kodaEngine.closeReportModal());
-    get('close-voice-modal-btn')?.addEventListener('click', () => window.kodaEngine.closeVoiceModal());
+    // 특정 닫기 버튼 수동 연결 (ID가 규칙과 다른 경우 대비)
+    document.getElementById('close-report-modal')?.addEventListener('click', () => window.kodaEngine.closeReportModal());
+    document.getElementById('close-voice-modal-btn')?.addEventListener('click', () => window.kodaEngine.closeVoiceModal());
+
+    // 장부 기록 버튼 명시적 연결 (인라인 onclick 먹통 대비)
+    const setupLedgerBtn = () => {
+        const ledgerBtn = document.querySelector('#voice-result-box button');
+        if (ledgerBtn) {
+            ledgerBtn.onclick = () => window.kodaEngine.confirmVoiceEntry();
+        }
+    };
+    setupLedgerBtn();
 });
