@@ -1,4 +1,4 @@
-const CACHE_NAME = 'yt-tax-force-refresh-v1';
+const CACHE_NAME = 'yt-tax-force-refresh-v1.2.1';
 
 self.addEventListener('install', (event) => {
     self.skipWaiting();
