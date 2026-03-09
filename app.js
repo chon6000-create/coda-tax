@@ -132,9 +132,9 @@ window.kodaEngine = (() => {
 
     const init = async () => {
         console.log("유튜버 종합소득세 신고앱 시작 (Stabilized)");
-        if (localStorage.getItem('app_v') !== 'v1.2.0_final') {
-            localStorage.setItem('app_v', 'v1.2.0_final');
-            console.log("App Reset to v1.2.0 (New Labels)");
+        if (localStorage.getItem('app_v') !== 'v1.2.1_final') {
+            localStorage.setItem('app_v', 'v1.2.1_final');
+            console.log("App Reset to v1.2.1 (Terminology Sync)");
         }
         if (window.location.hash !== '#/') window.location.hash = '#/';
         onAuthStateChanged(auth, (user) => {
@@ -417,7 +417,7 @@ window.kodaEngine = (() => {
                 if (modalDesc) modalDesc.innerText = "사용자의 음성을 인식하여 장부에 기록합니다.";
             } else {
                 if (aiSection) aiSection.style.display = 'block';
-                if (modalTitle) modalTitle.innerText = "AI 요약 및 간편 입력";
+                if (modalTitle) modalTitle.innerText = "내용 입력 및 간편 요약";
                 if (modalDesc) modalDesc.innerText = "AI를 활용해 복잡한 내역을 한 번에 정리하세요.";
             }
             get('bulk-modal').style.display = 'flex';
